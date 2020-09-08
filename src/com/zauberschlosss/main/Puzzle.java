@@ -5,9 +5,7 @@ import com.zauberschlosss.listeners.KeyListener;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -21,7 +19,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Puzzle extends JFrame {
-    static JPanel panel;
+    static JPanel panel = new JPanel();
     private BufferedImage source;
 
     private List<Button> buttons = new ArrayList<>();
@@ -32,13 +30,15 @@ public class Puzzle extends JFrame {
     private int width, height;
     private final int DESIRED_WIDTH = 800;
     private BufferedImage resized;
+    private String dataSource;
+    private String uri;
 
     private boolean initRotated = true;
     private int rows = 2;
     private int columns = 2;
 
     public Puzzle() throws URISyntaxException {
-        initUI();
+        initResources();
     }
 
     private void initUI() throws URISyntaxException {
@@ -49,12 +49,12 @@ public class Puzzle extends JFrame {
             }
         }
 
-        panel = new JPanel();
+//        panel = new JPanel();
         panel.setBorder(BorderFactory.createLineBorder(Color.gray));
         panel.setLayout(new GridLayout(rows, columns, 0, 0));
 
         try {
-            source = loadImage();
+            source = loadImage(dataSource, uri);
             int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
             resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
         } catch (IOException e) {
@@ -66,9 +66,6 @@ public class Puzzle extends JFrame {
 
         KeyListener keyListener = new KeyListener(this);
         panel.addKeyListener(keyListener);
-
-        panel.setFocusable(true);
-        add(panel);
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
@@ -100,11 +97,57 @@ public class Puzzle extends JFrame {
             button.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
 
+        panel.setFocusable(true);
+
         pack();
+    }
+
+    private void initResources() {
         setTitle("Puzzle");
-        setResizable(false);
+        setSize(800, 600);
+//        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JTabbedPane tabsPane = new JTabbedPane();
+        JPanel puzzleTab = panel;
+        JPanel sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        tabsPane.addTab("Puzzle", puzzleTab);
+        tabsPane.addTab("Source Image", sourceImageTab);
+
+        JButton selectFromHardDriveButton = new JButton("Load from HDD");
+        sourceImageTab.add(selectFromHardDriveButton);
+
+        JButton selectFromURL = new JButton("Load from URL");
+        sourceImageTab.add(selectFromURL);
+
+        sourceImageTab.add(new JLabel("Columns"));
+        sourceImageTab.add(new JTextField("3", 3));
+
+        sourceImageTab.add(new JLabel("Rows"));
+        sourceImageTab.add(new JTextField("3", 3));
+
+        selectFromHardDriveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setPreferredSize(new Dimension(700, 600));
+                fileChooser.setFileFilter(new JpgFileFilter());
+                fileChooser.showDialog(sourceImageTab, "Open");
+                dataSource = "HDD";
+                uri = fileChooser.getSelectedFile().toString();
+                tabsPane.setSelectedIndex(0);
+
+                try {
+                    initUI();
+                } catch (URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        add(tabsPane);
+        tabsPane.setSelectedIndex(1);
     }
 
     private int getNewHeight(int w, int h) {
@@ -113,12 +156,15 @@ public class Puzzle extends JFrame {
         return newHeight;
     }
 
-    private BufferedImage loadImage() {
+    private BufferedImage loadImage(String dataSource, String uri) {
         BufferedImage bufferedImage = null;
-        try {
-            bufferedImage = ImageIO.read(new File("C:\\Users\\Wint3rzaub3rschloss\\Pictures\\Wallpapers\\cropped-1920-1080-736806.jpg"));
-//            bufferedImage = ImageIO.read(new URL("https://lh3.googleusercontent.com/proxy/ikSgaBJ1oGBWzxoPm4xbpbltgJFbhle6xOiO0rZjqvphcwjaoV5IBTo4X3qw1iMR-szdOl1GwnUZeSK9UUnqQLZzCr6pcXvDC8ABwzJBWS6oC4aqpcX1gVCUo-lO0DEHjwjlBHlXZR9H2BDf8XvwQLomSXdvuJAK64GW1_2SU_mB"));
 
+        try {
+            if (dataSource.equals("HDD")) {
+                bufferedImage = ImageIO.read(new File(uri));
+            } else if (dataSource.equals("URL")) {
+                bufferedImage = ImageIO.read(new URL(uri));
+            }
         } catch (IOException e) {
             e.getStackTrace();
         }
@@ -156,13 +202,9 @@ public class Puzzle extends JFrame {
         return list1.toString().contentEquals(list2.toString());
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws URISyntaxException {
         Puzzle puzzle = null;
-        try {
-            puzzle = new Puzzle();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        puzzle = new Puzzle();
 
         puzzle.setVisible(true);
     }
@@ -240,5 +282,9 @@ public class Puzzle extends JFrame {
 
     public List<Button> getButtons() {
         return buttons;
+    }
+
+    public JPanel getPanel() {
+        return panel;
     }
 }

@@ -21,7 +21,7 @@ public class MouseListener extends MouseAdapter {
     @Override
     public void mouseEntered(MouseEvent e) {
         button.setBorder(BorderFactory.createLineBorder(Color.blue));
-        button.buttonReleased = (Button) e.getComponent();
+        Button.buttonReleased = (Button) e.getComponent();
     }
 
     @Override
@@ -31,23 +31,24 @@ public class MouseListener extends MouseAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        button.buttonPressed = (Button) e.getComponent();
+        Button.buttonPressed = (Button) e.getComponent();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (button.buttonPressed != null && button.buttonReleased != null) {
-            int pressedButtonIndex = puzzle.getButtons().indexOf(button.buttonPressed);
-            int releasedButtonIndex = puzzle.getButtons().indexOf(button.buttonReleased);
+        if (Button.buttonPressed != null && Button.buttonReleased != null) {
+            int pressedButtonIndex = puzzle.getButtons().indexOf(Button.buttonPressed);
+            int releasedButtonIndex = puzzle.getButtons().indexOf(Button.buttonReleased);
 
             if (pressedButtonIndex != releasedButtonIndex) {
                 Collections.swap(puzzle.getButtons(), pressedButtonIndex, releasedButtonIndex);
-                button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.blue));
-                button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
+                Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.blue));
+                Button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
             }
 
             puzzle.updateButtons();
             puzzle.checkSolution();
+            puzzle.getPanel().grabFocus();
         }
     }
 }

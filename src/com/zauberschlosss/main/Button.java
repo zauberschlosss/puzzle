@@ -28,8 +28,4 @@ public class Button extends JButton {
     public void setAngle(int angle) {
         this.angle = angle;
     }
-
-    public void setMouseListenerr(MouseListener mouseListener) {
-        this.mouseListener = mouseListener;
-    }
 }
