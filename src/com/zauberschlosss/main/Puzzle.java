@@ -1,12 +1,13 @@
 package com.zauberschlosss.main;
 
+import com.zauberschlosss.listeners.KeyListener;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -63,29 +64,8 @@ public class Puzzle extends JFrame {
         width = resized.getWidth();
         height = resized.getHeight();
 
-        panel.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_A) {
-                    rotateIcon(Button.buttonPressed, 90);
-                }
-
-                if (e.getKeyCode() == KeyEvent.VK_D) {
-                    rotateIcon(Button.buttonPressed, -90);
-                }
-
-                if (e.getKeyCode() == KeyEvent.VK_W) {
-                    rotateIcon(Button.buttonPressed, 180);
-                }
-
-                if (e.getKeyCode() == KeyEvent.VK_S) {
-                    rotateIcon(Button.buttonPressed, -180);
-                }
-
-                updateButtons();
-                checkSolution();
-            }
-        });
+        KeyListener keyListener = new KeyListener(this);
+        panel.addKeyListener(keyListener);
 
         panel.setFocusable(true);
         add(panel);
