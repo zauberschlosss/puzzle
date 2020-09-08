@@ -1,3 +1,5 @@
+package com.zauberschlosss.main;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -15,40 +17,40 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Puzzle extends JFrame {
     static JPanel panel;
     private BufferedImage source;
-    static ArrayList<Button> buttons = new ArrayList<>();
 
-    static ArrayList<Point> solution = new ArrayList<>();
+    private List<Button> buttons = new ArrayList<>();
+    private List<Point> solutionPoints = new ArrayList<>();
+    private List<Integer> solutionAngles = new ArrayList<>();
 
     private Image image;
     private int width, height;
     private final int DESIRED_WIDTH = 800;
     private BufferedImage resized;
 
+    private boolean initRotated = true;
+    private int rows = 2;
+    private int columns = 2;
+
     public Puzzle() throws URISyntaxException {
         initUI();
     }
 
     private void initUI() throws URISyntaxException {
-        solution.add(new Point(0, 0));
-        solution.add(new Point(0, 1));
-        solution.add(new Point(0, 2));
-        solution.add(new Point(1, 0));
-        solution.add(new Point(1, 1));
-        solution.add(new Point(1, 2));
-        solution.add(new Point(2, 0));
-        solution.add(new Point(2, 1));
-        solution.add(new Point(2, 2));
-        solution.add(new Point(3, 0));
-        solution.add(new Point(3, 1));
-        solution.add(new Point(3, 2));
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                solutionPoints.add(new Point(i, j));
+                solutionAngles.add(0);
+            }
+        }
 
         panel = new JPanel();
         panel.setBorder(BorderFactory.createLineBorder(Color.gray));
-        panel.setLayout(new GridLayout(4, 3, 0, 0));
+        panel.setLayout(new GridLayout(rows, columns, 0, 0));
 
         try {
             source = loadImage();
@@ -65,55 +67,46 @@ public class Puzzle extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_A) {
-                    Button.buttonPressed = rotateIcon(Button.buttonPressed, 90);
+                    rotateIcon(Button.buttonPressed, 90);
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_D) {
-                    Button.buttonPressed = rotateIcon(Button.buttonPressed, -90);
+                    rotateIcon(Button.buttonPressed, -90);
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_W) {
-                    Button.buttonPressed = rotateIcon(Button.buttonPressed, 180);
+                    rotateIcon(Button.buttonPressed, 180);
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_S) {
-                    Button.buttonPressed = rotateIcon(Button.buttonPressed, -180);
+                    rotateIcon(Button.buttonPressed, -180);
                 }
 
                 updateButtons();
-
-                System.out.println("I am here");
+                checkSolution();
             }
         });
 
         panel.setFocusable(true);
         add(panel);
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
                 image = createImage(new FilteredImageSource(resized.getSource(),
-                        new CropImageFilter(j * width / 3, i * height / 4,
-                                (width / 3), height / 4)));
+                        new CropImageFilter(j * width / rows, i * height / columns,
+                                (width / rows), height / columns)));
 
-                Button button = new Button(image);
+                Button button;
+                int newRandomAngle = 0;
+                if (!initRotated) {
+                    button = new Button(image, this);
+                } else {
+                    newRandomAngle = new Random().nextInt(4);
+                    button = new Button(image, this);
+                    button = rotateIcon(button, Button.angles[newRandomAngle]);
+                }
+
                 button.putClientProperty("position", new Point(i, j));
-
-                /*KeyStroke keyStroke = KeyStroke.getKeyStroke("A");
-                InputMap inputMap = button.getInputMap(JComponent.WHEN_FOCUSED);
-                inputMap.put(keyStroke, "rotateIcon");
-                ActionMap actionMap = button.getActionMap();
-                actionMap.put("rotateIcon", new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        Button buttonSelected = (Button) e.getSource();
-                        int buttonIndex = buttons.indexOf(buttonSelected);
-                        System.out.println(buttonIndex);
-                        buttonSelected = rotateIcon(buttonSelected);
-                        buttons.set(buttonIndex, buttonSelected);
-                    }
-                });*/
-
-
 
                 buttons.add(button);
             }
@@ -121,7 +114,7 @@ public class Puzzle extends JFrame {
 
         Collections.shuffle(buttons);
 
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < rows * columns; i++) {
             Button button = buttons.get(i);
             panel.add(button);
             button.setBorder(BorderFactory.createLineBorder(Color.gray));
@@ -164,24 +157,23 @@ public class Puzzle extends JFrame {
         return resizedImage;
     }
 
-    public static void checkSolution() {
-        ArrayList<Point> current = new ArrayList<>();
+    public void checkSolution() {
+        List<Point> currentPoints = new ArrayList<>();
+        List<Integer> currentAngles = new ArrayList<>();
 
-        for (JComponent btn : buttons) {
-            current.add((Point) btn.getClientProperty("position"));
-        }
+        buttons.forEach((e) -> currentPoints.add((Point) e.getClientProperty("position")));
+        buttons.forEach((e) -> currentAngles.add(e.getAngle()));
 
-        if (compareList(solution, current)) {
+        if (compareList(solutionPoints, currentPoints) && compareList(solutionAngles, currentAngles)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
-            solution = null;
+            solutionPoints = null;
             panel.setBorder(BorderFactory.createLineBorder(Color.blue));
-            Button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
             Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
 
-    public static boolean compareList(List<Point> ls1, List<Point> ls2) {
-        return ls1.toString().contentEquals(ls2.toString());
+    public static boolean compareList(List<?> list1, List<?> list2) {
+        return list1.toString().contentEquals(list2.toString());
     }
 
     public static void main(String[] args) {
@@ -195,7 +187,7 @@ public class Puzzle extends JFrame {
         puzzle.setVisible(true);
     }
 
-    public static Icon rotate(Image img, double angle)
+    public static Icon rotateImage(Image img, double angle)
     {
         double sin = Math.abs(Math.sin(Math.toRadians(angle))),
                 cos = Math.abs(Math.cos(Math.toRadians(angle)));
@@ -236,7 +228,7 @@ public class Puzzle extends JFrame {
         return bi;
     }
 
-    public static void updateButtons() {
+    public void updateButtons() {
         panel.removeAll();
 
         for (JComponent btn : buttons) {
@@ -249,12 +241,24 @@ public class Puzzle extends JFrame {
     public Button rotateIcon(Button button, int angle) {
         Icon newIcon = button.getIcon();
         Image newImage = iconToBufferedImage(newIcon);
-        newIcon = rotate(newImage, angle);
+        newIcon = rotateImage(newImage, angle);
         button.setIcon(newIcon);
+        button.setAngle(button.getAngle() + angle);
+
+        if (button.getAngle() == 360 || button.getAngle() == -360) {
+            button.setAngle(0);
+        } else if (button.getAngle() > 360) {
+            button.setAngle(button.getAngle() - 360);
+        } else if (button.getAngle() < 0) {
+            button.setAngle(button.getAngle() + 360);
+        }
+
         pack();
-        updateButtons();
-        panel.validate();
 
         return button;
+    }
+
+    public List<Button> getButtons() {
+        return buttons;
     }
 }
