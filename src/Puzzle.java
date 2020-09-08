@@ -2,13 +2,13 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +16,11 @@ import java.util.List;
 public class Puzzle extends JFrame {
     static JPanel panel;
     private BufferedImage source;
-    static ArrayList<Button> buttons = new ArrayList<>();;
+    static ArrayList<Button> buttons = new ArrayList<>();
 
-    ArrayList<Point> solution = new ArrayList<>();
+    static ArrayList<Point> solution = new ArrayList<>();
 
     private Image image;
-    private Button lastButton;
     private int width, height;
     private final int DESIRED_WIDTH = 600;
     private BufferedImage resized;
@@ -52,7 +51,6 @@ public class Puzzle extends JFrame {
             source = loadImage();
             int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
             resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,64 +62,20 @@ public class Puzzle extends JFrame {
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 3; j++) {
-
                 image = createImage(new FilteredImageSource(resized.getSource(),
                         new CropImageFilter(j * width / 3, i * height / 4,
                                 (width / 3), height / 4)));
 
-                System.out.println();
-
-                System.out.println(image.getWidth(null));
-                System.out.println(image.getHeight(null));
-
-                Icon rotatedIcon = rotate(image, 0);
-
-            /*    System.out.println(rotatedIcon.getIconWidth());
-                System.out.println(rotatedIcon.getIconHeight());*/
-
-                Button button = new Button(rotatedIcon);
+                Button button = new Button(image);
                 button.putClientProperty("position", new Point(i, j));
-
-                if (i == 3 && j == 2) {
-                    lastButton = new Button(rotatedIcon);
-                    lastButton.putClientProperty("position", new Point(i, j));
-                } else {
-                    buttons.add(button);
-                }
+                buttons.add(button);
             }
         }
 
         Collections.shuffle(buttons);
-        buttons.add(lastButton);
 
         for (int i = 0; i < 12; i++) {
             Button button = buttons.get(i);
-
-            /*Action action = new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Icon newIcon = button.getIcon();
-                    Image newImage = iconToBufferedImage(newIcon);
-                    newIcon = rotate(newImage, 90);
-                    button.setIcon(newIcon);
-                }
-            };*/
-
-            Icon newIcon = button.getIcon();
-
-            Image newImage = iconToBufferedImage(newIcon);
-            newIcon = rotate(newImage, 90);
-            System.out.println(newIcon.getIconWidth());
-            System.out.println(newIcon.getIconHeight());
-
-
-//            button.setAction(action);
-            updateButtons();
-
-            KeyStroke keyStroke = KeyStroke.getKeyStroke("SPACE");
-            InputMap inputMap = button.getInputMap(JComponent.WHEN_FOCUSED);
-            inputMap.put(keyStroke, "rotateImage");
-
             panel.add(button);
             button.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
@@ -142,7 +96,8 @@ public class Puzzle extends JFrame {
     private BufferedImage loadImage() {
         BufferedImage bufferedImage = null;
         try {
-            bufferedImage = ImageIO.read(new File("C:\\Users\\Wint3rzaub3rschloss\\Pictures\\Wallpapers\\cropped-1920-1080-736806.jpg"));
+//            bufferedImage = ImageIO.read(new File("C:\\Users\\Wint3rzaub3rschloss\\Pictures\\Wallpapers\\cropped-1920-1080-736806.jpg"));
+            bufferedImage = ImageIO.read(new URL("https://lh3.googleusercontent.com/proxy/ikSgaBJ1oGBWzxoPm4xbpbltgJFbhle6xOiO0rZjqvphcwjaoV5IBTo4X3qw1iMR-szdOl1GwnUZeSK9UUnqQLZzCr6pcXvDC8ABwzJBWS6oC4aqpcX1gVCUo-lO0DEHjwjlBHlXZR9H2BDf8XvwQLomSXdvuJAK64GW1_2SU_mB"));
 
         } catch (IOException e) {
             e.getStackTrace();
@@ -162,50 +117,7 @@ public class Puzzle extends JFrame {
         return resizedImage;
     }
 
-    private class MouseAction extends MouseAdapter {
-        private void checkButton(ActionEvent e) {
-                        System.out.println("|||||-->>");
-
-            System.out.println(buttons.indexOf(Button.buttonPressed));
-            System.out.println(buttons.indexOf(Button.buttonReleased));
-            if (Button.buttonPressed != null && Button.buttonReleased != null) {
-                int pressedButtonIndex = buttons.indexOf(Button.buttonPressed);
-                int releasedButtonIndex = buttons.indexOf(Button.buttonReleased);
-                Collections.swap(buttons, pressedButtonIndex, releasedButtonIndex);
-                updateButtons();
-            }
-        }
-
-        private void updateButtons() {
-            panel.removeAll();
-
-            for (JComponent btn : buttons) {
-                panel.add(btn);
-            }
-
-            panel.validate();
-        }
-
-        private void rotateIcon(ActionEvent e) {
-            int lidx = 0;
-            Button button = (Button) e.getSource();
-            Icon newIcon = button.getIcon();
-            Image newImage = iconToBufferedImage(newIcon);
-            newIcon = rotate(newImage, 90);
-            System.out.println("-----**");
-            System.out.println(newIcon.getIconWidth());
-            System.out.println(newIcon.getIconHeight());
-            button.setIcon(newIcon);
-//            button.setSize(newIcon.getIconWidth() + 2, newIcon.getIconHeight() + 2);
-            System.out.println("Button width: " + button.getWidth());
-            System.out.println("Button height: " + button.getHeight());
-            pack();
-            updateButtons();
-            panel.validate();
-        }
-    }
-
-    private void checkSolution() {
+    public static void checkSolution() {
         ArrayList<Point> current = new ArrayList<>();
 
         for (JComponent btn : buttons) {
@@ -214,6 +126,7 @@ public class Puzzle extends JFrame {
 
         if (compareList(solution, current)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
+            solution = null;
         }
     }
 
@@ -230,7 +143,6 @@ public class Puzzle extends JFrame {
         }
 
         puzzle.setVisible(true);
-//        puzzle.setResizable(true);
     }
 
     public static Icon rotate(Image img, double angle)
@@ -281,6 +193,17 @@ public class Puzzle extends JFrame {
             panel.add(btn);
         }
 
+        panel.validate();
+    }
+
+    private void rotateIcon(ActionEvent e) {
+        Button button = (Button) e.getSource();
+        Icon newIcon = button.getIcon();
+        Image newImage = iconToBufferedImage(newIcon);
+        newIcon = rotate(newImage, 90);
+        button.setIcon(newIcon);
+        pack();
+        updateButtons();
         panel.validate();
     }
 }
