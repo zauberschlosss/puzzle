@@ -3,18 +3,26 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-class Button extends JButton {
+class Button extends JToggleButton {
 
     private boolean isLastButton;
+    static JToggleButton buttonPressed;
+    static JToggleButton buttonReleased;
 
     public Button() {
         initUI();
     }
 
+    public Button(Icon icon) {
+        super(icon);
+        initUI();
+    }
+/*
     public Button(Image image) {
         super(new ImageIcon(image));
         initUI();
     }
+*/
 
     private void initUI() {
         isLastButton = false;
@@ -23,12 +31,22 @@ class Button extends JButton {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                setBorder(BorderFactory.createLineBorder(Color.yellow));
+                setBorder(BorderFactory.createLineBorder(Color.blue));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 setBorder(BorderFactory.createLineBorder(Color.gray));
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                buttonPressed = (JToggleButton) e.getSource();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                buttonReleased = (JToggleButton) e.getSource();
             }
         });
     }
@@ -40,13 +58,4 @@ class Button extends JButton {
     public boolean isLastButton() {
         return isLastButton;
     }
-
-    /*@Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        int cx = getWidth() / 2;
-        int cy = getHeight() / 2;
-        g2.rotate(Math.PI / 2, cx, cy);
-        super.paintComponent(g2);
-    }*/
 }
