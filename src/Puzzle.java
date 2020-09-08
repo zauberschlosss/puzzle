@@ -2,6 +2,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -22,7 +25,7 @@ public class Puzzle extends JFrame {
 
     private Image image;
     private int width, height;
-    private final int DESIRED_WIDTH = 600;
+    private final int DESIRED_WIDTH = 800;
     private BufferedImage resized;
 
     public Puzzle() throws URISyntaxException {
@@ -58,6 +61,32 @@ public class Puzzle extends JFrame {
         width = resized.getWidth();
         height = resized.getHeight();
 
+        panel.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_A) {
+                    Button.buttonPressed = rotateIcon(Button.buttonPressed, 90);
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_D) {
+                    Button.buttonPressed = rotateIcon(Button.buttonPressed, -90);
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_W) {
+                    Button.buttonPressed = rotateIcon(Button.buttonPressed, 180);
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_S) {
+                    Button.buttonPressed = rotateIcon(Button.buttonPressed, -180);
+                }
+
+                updateButtons();
+
+                System.out.println("I am here");
+            }
+        });
+
+        panel.setFocusable(true);
         add(panel);
 
         for (int i = 0; i < 4; i++) {
@@ -68,6 +97,24 @@ public class Puzzle extends JFrame {
 
                 Button button = new Button(image);
                 button.putClientProperty("position", new Point(i, j));
+
+                /*KeyStroke keyStroke = KeyStroke.getKeyStroke("A");
+                InputMap inputMap = button.getInputMap(JComponent.WHEN_FOCUSED);
+                inputMap.put(keyStroke, "rotateIcon");
+                ActionMap actionMap = button.getActionMap();
+                actionMap.put("rotateIcon", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Button buttonSelected = (Button) e.getSource();
+                        int buttonIndex = buttons.indexOf(buttonSelected);
+                        System.out.println(buttonIndex);
+                        buttonSelected = rotateIcon(buttonSelected);
+                        buttons.set(buttonIndex, buttonSelected);
+                    }
+                });*/
+
+
+
                 buttons.add(button);
             }
         }
@@ -96,8 +143,8 @@ public class Puzzle extends JFrame {
     private BufferedImage loadImage() {
         BufferedImage bufferedImage = null;
         try {
-//            bufferedImage = ImageIO.read(new File("C:\\Users\\Wint3rzaub3rschloss\\Pictures\\Wallpapers\\cropped-1920-1080-736806.jpg"));
-            bufferedImage = ImageIO.read(new URL("https://lh3.googleusercontent.com/proxy/ikSgaBJ1oGBWzxoPm4xbpbltgJFbhle6xOiO0rZjqvphcwjaoV5IBTo4X3qw1iMR-szdOl1GwnUZeSK9UUnqQLZzCr6pcXvDC8ABwzJBWS6oC4aqpcX1gVCUo-lO0DEHjwjlBHlXZR9H2BDf8XvwQLomSXdvuJAK64GW1_2SU_mB"));
+            bufferedImage = ImageIO.read(new File("C:\\Users\\Wint3rzaub3rschloss\\Pictures\\Wallpapers\\cropped-1920-1080-736806.jpg"));
+//            bufferedImage = ImageIO.read(new URL("https://lh3.googleusercontent.com/proxy/ikSgaBJ1oGBWzxoPm4xbpbltgJFbhle6xOiO0rZjqvphcwjaoV5IBTo4X3qw1iMR-szdOl1GwnUZeSK9UUnqQLZzCr6pcXvDC8ABwzJBWS6oC4aqpcX1gVCUo-lO0DEHjwjlBHlXZR9H2BDf8XvwQLomSXdvuJAK64GW1_2SU_mB"));
 
         } catch (IOException e) {
             e.getStackTrace();
@@ -127,6 +174,9 @@ public class Puzzle extends JFrame {
         if (compareList(solution, current)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
             solution = null;
+            panel.setBorder(BorderFactory.createLineBorder(Color.blue));
+            Button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
+            Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
 
@@ -196,14 +246,15 @@ public class Puzzle extends JFrame {
         panel.validate();
     }
 
-    private void rotateIcon(ActionEvent e) {
-        Button button = (Button) e.getSource();
+    public Button rotateIcon(Button button, int angle) {
         Icon newIcon = button.getIcon();
         Image newImage = iconToBufferedImage(newIcon);
-        newIcon = rotate(newImage, 90);
+        newIcon = rotate(newImage, angle);
         button.setIcon(newIcon);
         pack();
         updateButtons();
         panel.validate();
+
+        return button;
     }
 }

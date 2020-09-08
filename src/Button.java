@@ -4,11 +4,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
 
-class Button extends JToggleButton {
+class Button extends JButton {
 
     private boolean isLastButton;
-    static JToggleButton buttonPressed;
-    static JToggleButton buttonReleased;
+    static Button buttonPressed;
+    static Button buttonReleased;
 
     public Button() {
         initUI();
@@ -18,6 +18,7 @@ class Button extends JToggleButton {
         super(icon);
         initUI();
     }*/
+
     public Button(Image image) {
         super(new ImageIcon(image));
         initUI();
@@ -31,7 +32,7 @@ class Button extends JToggleButton {
             @Override
             public void mouseEntered(MouseEvent e) {
                 setBorder(BorderFactory.createLineBorder(Color.blue));
-                buttonReleased = (JToggleButton) e.getComponent();
+                buttonReleased = (Button) e.getComponent();
             }
 
             @Override
@@ -42,21 +43,20 @@ class Button extends JToggleButton {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                buttonPressed = (JToggleButton) e.getSource();
-                System.out.println(Puzzle.buttons.indexOf(Button.buttonPressed));
-                System.out.println("Inside mousePressed method");
+                buttonPressed = (Button) e.getComponent();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-//                buttonReleased = (JToggleButton) e.getComponent();
-                System.out.println(Puzzle.buttons.indexOf(Button.buttonPressed));
-                System.out.println(Puzzle.buttons.indexOf(Button.buttonReleased));
-                System.out.println("Inside mouseRelease method");
                 if (Button.buttonPressed != null && Button.buttonReleased != null) {
                     int pressedButtonIndex = Puzzle.buttons.indexOf(Button.buttonPressed);
                     int releasedButtonIndex = Puzzle.buttons.indexOf(Button.buttonReleased);
                     Collections.swap(Puzzle.buttons, pressedButtonIndex, releasedButtonIndex);
+
+                    Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.blue));
+                    Button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
+//                    setBorder(BorderFactory.createLineBorder(Color.blue));
+
 
                     Puzzle.updateButtons();
                     Puzzle.checkSolution();
