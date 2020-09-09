@@ -27,6 +27,7 @@ public class KeyListener extends KeyAdapter {
             puzzle.rotateIcon(Button.buttonPressed, 180);
         }
 
+
         puzzle.updateButtons();
         puzzle.checkSolution();
     }

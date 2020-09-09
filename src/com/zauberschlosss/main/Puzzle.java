@@ -18,6 +18,16 @@ import java.util.List;
 
 public class Puzzle extends JFrame {
     static JPanel panel = new JPanel();
+    private JPanel puzzlePicture;
+    private JTabbedPane tabsPane;
+    private JMenuItem playAgain;
+    private JMenuItem newPuzzle;
+    private JMenuItem rotateClockwise;
+    private JMenuItem rotateAnticlockwise;
+    private JMenuItem rotateAround;
+    private JMenuItem magicButton;
+    private JComboBox<Integer> gridSelection;
+    private JCheckBox checkBoxIsRotated;
     private BufferedImage source;
 
     private List<Button> buttons = new ArrayList<>();
@@ -36,7 +46,7 @@ public class Puzzle extends JFrame {
     private int columns = 2;
 
     public Puzzle() throws URISyntaxException {
-        initResources();
+        setupResourcesAndUI();
     }
 
     private void initUI() throws URISyntaxException {
@@ -97,18 +107,24 @@ public class Puzzle extends JFrame {
         pack();
     }
 
-    private void initResources() {
+    private void setupResourcesAndUI() {
         setTitle("Puzzle");
         setVisible(true);
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JTabbedPane tabsPane = new JTabbedPane();
+        tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
         JPanel sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        puzzlePicture = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
         tabsPane.addTab("Puzzle", puzzleTab);
-        tabsPane.addTab("Source Image", sourceImageTab);
+        tabsPane.addTab("Picture", puzzlePicture);
+        tabsPane.addTab("Source", sourceImageTab);
+
+        tabsPane.setEnabledAt(0, false);
+        tabsPane.setEnabledAt(1, false);
 
         JButton selectFromHardDriveButton = new JButton("Load from HDD");
         sourceImageTab.add(selectFromHardDriveButton);
@@ -118,7 +134,7 @@ public class Puzzle extends JFrame {
 
         JLabel grid = new JLabel("Select Grid");
 
-        JComboBox<Integer> gridSelection = new JComboBox<>();
+        gridSelection = new JComboBox<>();
         gridSelection.addItem(2);
         gridSelection.addItem(3);
         gridSelection.addItem(4);
@@ -136,7 +152,7 @@ public class Puzzle extends JFrame {
         sourceImageTab.add(gridSelection);
 
         JLabel isRotated = new JLabel("Rotate");
-        JCheckBox checkBoxIsRotated = new JCheckBox();
+        checkBoxIsRotated = new JCheckBox();
 
         sourceImageTab.add(isRotated);
         sourceImageTab.add(checkBoxIsRotated);
@@ -145,46 +161,71 @@ public class Puzzle extends JFrame {
 
         JMenu game = new JMenu("Game");
 
-        JMenuItem playAgain = new JMenuItem("Play again");
+        playAgain = new JMenuItem("Play again");
         playAgain.setAccelerator(KeyStroke.getKeyStroke("R"));
+        playAgain.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reset();
+                try {
+                    initUI();
+                } catch (URISyntaxException uriSyntaxException) {
+                    uriSyntaxException.printStackTrace();
+                }
+                tabsPane.setSelectedIndex(0);
+            }
+        });
         playAgain.setEnabled(false);
         game.add(playAgain);
 
-        JMenuItem newPuzzle = new JMenuItem("New puzzle");
+        newPuzzle = new JMenuItem("New puzzle");
         newPuzzle.setAccelerator(KeyStroke.getKeyStroke("N"));
+        newPuzzle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tabsPane.setEnabledAt(0, false);
+                tabsPane.setEnabledAt(1, false);
+                playAgain.setEnabled(false);
+                newPuzzle.setEnabled(false);
+                rotateClockwise.setEnabled(false);
+                rotateAnticlockwise.setEnabled(false);
+                rotateAround.setEnabled(false);
+                magicButton.setEnabled(false);
+                puzzlePicture.removeAll();
+
+                tabsPane.setSelectedIndex(2);
+            }
+        });
         newPuzzle.setEnabled(false);
         game.add(newPuzzle);
 
         game.addSeparator();
 
         JMenuItem exit = new JMenuItem("Exit");
-        exit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-
+        exit.addActionListener(e -> System.exit(0));
         game.add(exit);
 
         JMenu controls = new JMenu("Controls");
 
-        JMenuItem rotateClockwise = new JMenuItem("Rotate clockwise");
+        rotateClockwise = new JMenuItem("Rotate clockwise");
         rotateClockwise.setAccelerator(KeyStroke.getKeyStroke("D"));
+        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
         rotateClockwise.setEnabled(false);
         controls.add(rotateClockwise);
 
-        JMenuItem rotateAnticlockwise = new JMenuItem("Rotate anticlockwise");
+        rotateAnticlockwise = new JMenuItem("Rotate anticlockwise");
         rotateAnticlockwise.setAccelerator(KeyStroke.getKeyStroke("A"));
+        rotateAnticlockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, -90));
         rotateAnticlockwise.setEnabled(false);
         controls.add(rotateAnticlockwise);
 
-        JMenuItem rotateAround = new JMenuItem("Rotate 180");
+        rotateAround = new JMenuItem("Rotate 180");
         rotateAround.setAccelerator(KeyStroke.getKeyStroke("W"));
+        rotateAround.addActionListener(e -> rotateIcon(Button.buttonPressed, 180));
         rotateAround.setEnabled(false);
         controls.add(rotateAround);
 
-        JMenuItem magicButton = new JMenuItem("Magic button");
+        magicButton = new JMenuItem("Magic button");
         magicButton.setAccelerator(KeyStroke.getKeyStroke("M"));
         magicButton.setEnabled(false);
         controls.add(magicButton);
@@ -204,27 +245,8 @@ public class Puzzle extends JFrame {
                 if (fileChooser.showDialog(sourceImageTab, "Open") == JFileChooser.OPEN_DIALOG) {
                     dataSource = "HDD";
                     uri = fileChooser.getSelectedFile().toString();
-                    rows = (int) gridSelection.getSelectedItem();
-                    columns = (int) gridSelection.getSelectedItem();
-                    if (checkBoxIsRotated.isSelected()) {
-                        initRotated = true;
-                    }
-
+                    initResources();
                     tabsPane.setSelectedIndex(0);
-
-                    try {
-                        initUI();
-                        JLabel picLabel = new JLabel(new ImageIcon(resized));
-                        sourceImageTab.add(picLabel);
-                        playAgain.setEnabled(true);
-                        newPuzzle.setEnabled(true);
-                        rotateClockwise.setEnabled(true);
-                        rotateAnticlockwise.setEnabled(true);
-                        rotateAround.setEnabled(true);
-                        magicButton.setEnabled(true);
-                    } catch (URISyntaxException ex) {
-                        ex.printStackTrace();
-                    }
                 }
             }
         });
@@ -235,27 +257,49 @@ public class Puzzle extends JFrame {
                 Object result = JOptionPane.showInputDialog(panel, "Enter URL");
                 dataSource = "URL";
                 uri = (String) result;
-                tabsPane.setSelectedIndex(0);
+                initResources();
 
-                try {
-                    initUI();
-                    JLabel picLabel = new JLabel(new ImageIcon(resized));
-                    sourceImageTab.add(picLabel);
-                    sourceImageTab.add(picLabel);
-                    playAgain.setEnabled(true);
-                    newPuzzle.setEnabled(true);
-                    rotateClockwise.setEnabled(true);
-                    rotateAnticlockwise.setEnabled(true);
-                    rotateAround.setEnabled(true);
-                    magicButton.setEnabled(true);
-                } catch (URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
+                tabsPane.setSelectedIndex(0);
             }
         });
 
         add(tabsPane);
-        tabsPane.setSelectedIndex(1);
+        tabsPane.setSelectedIndex(2);
+    }
+
+    private void reset() {
+        buttons = new ArrayList<>();
+        solutionPoints = new ArrayList<>();
+        solutionAngles = new ArrayList<>();
+        panel.removeAll();
+    }
+
+    private void initResources() {
+        try {
+            rows = (int) gridSelection.getSelectedItem();
+            columns = (int) gridSelection.getSelectedItem();
+            if (checkBoxIsRotated.isSelected()) {
+                initRotated = true;
+            }
+
+            reset();
+            initUI();
+            setLocationRelativeTo(null);
+
+            JLabel picLabel = new JLabel(new ImageIcon(resized));
+            puzzlePicture.add(picLabel);
+
+            tabsPane.setEnabledAt(0, true);
+            tabsPane.setEnabledAt(1, true);
+            playAgain.setEnabled(true);
+            newPuzzle.setEnabled(true);
+            rotateClockwise.setEnabled(true);
+            rotateAnticlockwise.setEnabled(true);
+            rotateAround.setEnabled(true);
+            magicButton.setEnabled(true);
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private int getNewHeight(int w, int h) {
@@ -389,6 +433,7 @@ public class Puzzle extends JFrame {
         }
 
         pack();
+        setLocationRelativeTo(null);
 
         return button;
     }
