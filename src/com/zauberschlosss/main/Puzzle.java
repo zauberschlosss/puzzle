@@ -1,6 +1,8 @@
 package com.zauberschlosss.main;
 
+import com.zauberschlosss.listeners.FileChooserListener;
 import com.zauberschlosss.listeners.KeyListener;
+import com.zauberschlosss.listeners.URListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +19,8 @@ import java.util.*;
 import java.util.List;
 
 public class Puzzle extends JFrame {
-    static JPanel panel = new JPanel();
+    private JPanel panel = new JPanel();
+    private JPanel sourceImageTab;
     private JPanel puzzlePicture;
     private JTabbedPane tabsPane;
     private JMenuItem playAgain;
@@ -28,7 +31,6 @@ public class Puzzle extends JFrame {
     private JMenuItem magicButton;
     private JComboBox<Integer> gridSelection;
     private JCheckBox checkBoxIsRotated;
-    private BufferedImage source;
 
     private List<Button> buttons = new ArrayList<>();
     private List<Point> solutionPoints = new ArrayList<>();
@@ -37,6 +39,7 @@ public class Puzzle extends JFrame {
     private Image image;
     private int width, height;
     private final int DESIRED_WIDTH = 750;
+    private BufferedImage source;
     private BufferedImage resized;
     private String dataSource;
     private String uri;
@@ -116,7 +119,7 @@ public class Puzzle extends JFrame {
 
         tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
-        JPanel sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
         puzzlePicture = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         tabsPane.addTab("Puzzle", puzzleTab);
@@ -235,33 +238,8 @@ public class Puzzle extends JFrame {
 
         setJMenuBar(menuBar);
 
-        selectFromHardDriveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setPreferredSize(new Dimension(700, 600));
-                fileChooser.setFileFilter(new JpgFileFilter());
-
-                if (fileChooser.showDialog(sourceImageTab, "Open") == JFileChooser.OPEN_DIALOG) {
-                    dataSource = "HDD";
-                    uri = fileChooser.getSelectedFile().toString();
-                    initResources();
-                    tabsPane.setSelectedIndex(0);
-                }
-            }
-        });
-
-        selectFromURL.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Object result = JOptionPane.showInputDialog(panel, "Enter URL");
-                dataSource = "URL";
-                uri = (String) result;
-                initResources();
-
-                tabsPane.setSelectedIndex(0);
-            }
-        });
+        selectFromHardDriveButton.addActionListener(new FileChooserListener(this));
+        selectFromURL.addActionListener(new URListener(this));
 
         add(tabsPane);
         tabsPane.setSelectedIndex(2);
@@ -274,7 +252,7 @@ public class Puzzle extends JFrame {
         panel.removeAll();
     }
 
-    private void initResources() {
+    public void initResources() {
         try {
             rows = (int) gridSelection.getSelectedItem();
             columns = (int) gridSelection.getSelectedItem();
@@ -333,6 +311,16 @@ public class Puzzle extends JFrame {
         graphics.dispose();
 
         return resizedImage;
+    }
+
+    public void updateButtons() {
+        panel.removeAll();
+
+        for (JComponent btn : buttons) {
+            panel.add(btn);
+        }
+
+        panel.validate();
     }
 
     public void checkSolution() {
@@ -407,16 +395,6 @@ public class Puzzle extends JFrame {
         return bi;
     }
 
-    public void updateButtons() {
-        panel.removeAll();
-
-        for (JComponent btn : buttons) {
-            panel.add(btn);
-        }
-
-        panel.validate();
-    }
-
     public Button rotateIcon(Button button, int angle) {
         Icon newIcon = button.getIcon();
         Image newImage = iconToBufferedImage(newIcon);
@@ -444,5 +422,21 @@ public class Puzzle extends JFrame {
 
     public JPanel getPanel() {
         return panel;
+    }
+
+    public JPanel getSourceImageTab() {
+        return sourceImageTab;
+    }
+
+    public JTabbedPane getTabsPane() {
+        return tabsPane;
+    }
+
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }
