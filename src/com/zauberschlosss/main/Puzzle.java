@@ -208,19 +208,19 @@ public class Puzzle extends JFrame {
         JMenu controls = new JMenu("Controls");
 
         rotateClockwise = new JMenuItem("Rotate clockwise");
-        rotateClockwise.setAccelerator(KeyStroke.getKeyStroke("D"));
+        rotateClockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_D));
         rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
         rotateClockwise.setEnabled(false);
         controls.add(rotateClockwise);
 
         rotateAnticlockwise = new JMenuItem("Rotate anticlockwise");
-        rotateAnticlockwise.setAccelerator(KeyStroke.getKeyStroke("A"));
+        rotateAnticlockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_A));
         rotateAnticlockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, -90));
         rotateAnticlockwise.setEnabled(false);
         controls.add(rotateAnticlockwise);
 
         rotateAround = new JMenuItem("Rotate 180");
-        rotateAround.setAccelerator(KeyStroke.getKeyStroke("W"));
+        rotateAround.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_W));
         rotateAround.addActionListener(e -> rotateIcon(Button.buttonPressed, 180));
         rotateAround.setEnabled(false);
         controls.add(rotateAround);
