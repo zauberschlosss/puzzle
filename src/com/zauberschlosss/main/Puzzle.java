@@ -28,7 +28,7 @@ public class Puzzle extends JFrame {
 
     private Image image;
     private int width, height;
-    private final int DESIRED_WIDTH = 800;
+    private final int DESIRED_WIDTH = 700;
     private BufferedImage resized;
     private String dataSource;
     private String uri;
@@ -49,12 +49,13 @@ public class Puzzle extends JFrame {
             }
         }
 
-//        panel = new JPanel();
         panel.setBorder(BorderFactory.createLineBorder(Color.gray));
         panel.setLayout(new GridLayout(rows, columns, 0, 0));
 
         try {
             source = loadImage(dataSource, uri);
+            System.out.println(dataSource);
+            System.out.println(uri);
             int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
             resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
         } catch (IOException e) {
@@ -97,8 +98,6 @@ public class Puzzle extends JFrame {
             button.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
 
-        panel.setFocusable(true);
-
         pack();
     }
 
@@ -136,6 +135,22 @@ public class Puzzle extends JFrame {
                 fileChooser.showDialog(sourceImageTab, "Open");
                 dataSource = "HDD";
                 uri = fileChooser.getSelectedFile().toString();
+                tabsPane.setSelectedIndex(0);
+
+                try {
+                    initUI();
+                } catch (URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        selectFromURL.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object result = JOptionPane.showInputDialog(panel, "Enter URL");
+                dataSource = "URL";
+                uri = (String) result;
                 tabsPane.setSelectedIndex(0);
 
                 try {
@@ -202,9 +217,14 @@ public class Puzzle extends JFrame {
         return list1.toString().contentEquals(list2.toString());
     }
 
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) {
         Puzzle puzzle = null;
-        puzzle = new Puzzle();
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            puzzle = new Puzzle();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         puzzle.setVisible(true);
     }
