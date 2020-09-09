@@ -141,6 +141,59 @@ public class Puzzle extends JFrame {
         sourceImageTab.add(isRotated);
         sourceImageTab.add(checkBoxIsRotated);
 
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu game = new JMenu("Game");
+
+        JMenuItem playAgain = new JMenuItem("Play again");
+        playAgain.setAccelerator(KeyStroke.getKeyStroke("R"));
+        playAgain.setEnabled(false);
+        game.add(playAgain);
+
+        JMenuItem newPuzzle = new JMenuItem("New puzzle");
+        newPuzzle.setAccelerator(KeyStroke.getKeyStroke("N"));
+        newPuzzle.setEnabled(false);
+        game.add(newPuzzle);
+
+        game.addSeparator();
+
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        game.add(exit);
+
+        JMenu controls = new JMenu("Controls");
+
+        JMenuItem rotateClockwise = new JMenuItem("Rotate clockwise");
+        rotateClockwise.setAccelerator(KeyStroke.getKeyStroke("D"));
+        rotateClockwise.setEnabled(false);
+        controls.add(rotateClockwise);
+
+        JMenuItem rotateAnticlockwise = new JMenuItem("Rotate anticlockwise");
+        rotateAnticlockwise.setAccelerator(KeyStroke.getKeyStroke("A"));
+        rotateAnticlockwise.setEnabled(false);
+        controls.add(rotateAnticlockwise);
+
+        JMenuItem rotateAround = new JMenuItem("Rotate 180");
+        rotateAround.setAccelerator(KeyStroke.getKeyStroke("W"));
+        rotateAround.setEnabled(false);
+        controls.add(rotateAround);
+
+        JMenuItem magicButton = new JMenuItem("Magic button");
+        magicButton.setAccelerator(KeyStroke.getKeyStroke("M"));
+        magicButton.setEnabled(false);
+        controls.add(magicButton);
+
+        menuBar.add(game);
+        menuBar.add(controls);
+
+        setJMenuBar(menuBar);
+
         selectFromHardDriveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,6 +214,14 @@ public class Puzzle extends JFrame {
 
                     try {
                         initUI();
+                        JLabel picLabel = new JLabel(new ImageIcon(resized));
+                        sourceImageTab.add(picLabel);
+                        playAgain.setEnabled(true);
+                        newPuzzle.setEnabled(true);
+                        rotateClockwise.setEnabled(true);
+                        rotateAnticlockwise.setEnabled(true);
+                        rotateAround.setEnabled(true);
+                        magicButton.setEnabled(true);
                     } catch (URISyntaxException ex) {
                         ex.printStackTrace();
                     }
@@ -178,6 +239,15 @@ public class Puzzle extends JFrame {
 
                 try {
                     initUI();
+                    JLabel picLabel = new JLabel(new ImageIcon(resized));
+                    sourceImageTab.add(picLabel);
+                    sourceImageTab.add(picLabel);
+                    playAgain.setEnabled(true);
+                    newPuzzle.setEnabled(true);
+                    rotateClockwise.setEnabled(true);
+                    rotateAnticlockwise.setEnabled(true);
+                    rotateAround.setEnabled(true);
+                    magicButton.setEnabled(true);
                 } catch (URISyntaxException ex) {
                     ex.printStackTrace();
                 }
