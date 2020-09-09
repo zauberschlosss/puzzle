@@ -13,10 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 public class Puzzle extends JFrame {
     static JPanel panel = new JPanel();
@@ -28,12 +26,12 @@ public class Puzzle extends JFrame {
 
     private Image image;
     private int width, height;
-    private final int DESIRED_WIDTH = 700;
+    private final int DESIRED_WIDTH = 750;
     private BufferedImage resized;
     private String dataSource;
     private String uri;
 
-    private boolean initRotated = true;
+    private boolean initRotated = false;
     private int rows = 2;
     private int columns = 2;
 
@@ -54,8 +52,6 @@ public class Puzzle extends JFrame {
 
         try {
             source = loadImage(dataSource, uri);
-            System.out.println(dataSource);
-            System.out.println(uri);
             int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
             resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
         } catch (IOException e) {
@@ -103,8 +99,8 @@ public class Puzzle extends JFrame {
 
     private void initResources() {
         setTitle("Puzzle");
+        setVisible(true);
         setSize(800, 600);
-//        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -120,11 +116,30 @@ public class Puzzle extends JFrame {
         JButton selectFromURL = new JButton("Load from URL");
         sourceImageTab.add(selectFromURL);
 
-        sourceImageTab.add(new JLabel("Columns"));
-        sourceImageTab.add(new JTextField("3", 3));
+        JLabel grid = new JLabel("Select Grid");
 
-        sourceImageTab.add(new JLabel("Rows"));
-        sourceImageTab.add(new JTextField("3", 3));
+        JComboBox<Integer> gridSelection = new JComboBox<>();
+        gridSelection.addItem(2);
+        gridSelection.addItem(3);
+        gridSelection.addItem(4);
+        gridSelection.addItem(5);
+        gridSelection.addItem(6);
+        gridSelection.addItem(7);
+        gridSelection.addItem(8);
+        gridSelection.addItem(9);
+        gridSelection.addItem(10);
+
+        gridSelection.setSelectedIndex(1);
+        gridSelection.setMaximumRowCount(9);
+
+        sourceImageTab.add(grid);
+        sourceImageTab.add(gridSelection);
+
+        JLabel isRotated = new JLabel("Rotate");
+        JCheckBox checkBoxIsRotated = new JCheckBox();
+
+        sourceImageTab.add(isRotated);
+        sourceImageTab.add(checkBoxIsRotated);
 
         selectFromHardDriveButton.addActionListener(new ActionListener() {
             @Override
@@ -132,15 +147,23 @@ public class Puzzle extends JFrame {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setPreferredSize(new Dimension(700, 600));
                 fileChooser.setFileFilter(new JpgFileFilter());
-                fileChooser.showDialog(sourceImageTab, "Open");
-                dataSource = "HDD";
-                uri = fileChooser.getSelectedFile().toString();
-                tabsPane.setSelectedIndex(0);
 
-                try {
-                    initUI();
-                } catch (URISyntaxException ex) {
-                    ex.printStackTrace();
+                if (fileChooser.showDialog(sourceImageTab, "Open") == JFileChooser.OPEN_DIALOG) {
+                    dataSource = "HDD";
+                    uri = fileChooser.getSelectedFile().toString();
+                    rows = (int) gridSelection.getSelectedItem();
+                    columns = (int) gridSelection.getSelectedItem();
+                    if (checkBoxIsRotated.isSelected()) {
+                        initRotated = true;
+                    }
+
+                    tabsPane.setSelectedIndex(0);
+
+                    try {
+                        initUI();
+                    } catch (URISyntaxException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -208,7 +231,7 @@ public class Puzzle extends JFrame {
         if (compareList(solutionPoints, currentPoints) && compareList(solutionAngles, currentAngles)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
             solutionPoints = null;
-            panel.setBorder(BorderFactory.createLineBorder(Color.blue));
+            panel.setBorder(BorderFactory.createLineBorder(Color.green));
             Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
