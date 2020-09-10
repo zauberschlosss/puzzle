@@ -15,6 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
@@ -33,8 +36,11 @@ public class Puzzle extends JFrame {
     private JCheckBox checkBoxIsRotated;
 
     private List<Button> buttons = new ArrayList<>();
+    private List<Button> newButtons = new ArrayList<>();
     private List<Point> solutionPoints = new ArrayList<>();
     private List<Integer> solutionAngles = new ArrayList<>();
+    private Map<Integer, Long> solutionBitMap = new HashMap<>();
+    private Map<Integer, Long> piecesBitMap = new HashMap<>();
 
     private Image image;
     private int width, height;
@@ -80,8 +86,19 @@ public class Puzzle extends JFrame {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 image = createImage(new FilteredImageSource(resized.getSource(),
-                        new CropImageFilter(j * width / rows, i * height / columns,
-                                (width / rows), height / columns)));
+                        new CropImageFilter(j * width / rows, i * height / columns, (width / rows), height / columns)));
+
+                BufferedImage piece = imageToBufferedImage(image);
+                savePuzzlePieceToDisk(piece);
+
+                long sumRGB = 0;
+                for (int y = 0; y < piece.getHeight(); y++) {
+                    for (int x = 0; x < piece.getWidth(); x++) {
+                        sumRGB += piece.getRGB(x, y);
+                    }
+                }
+
+                solutionBitMap.put(solutionBitMap.size(), sumRGB);
 
                 Button button;
                 int newRandomAngle = 0;
@@ -99,6 +116,8 @@ public class Puzzle extends JFrame {
             }
         }
 
+        calculatePiecesBitMap();
+
         Collections.shuffle(buttons);
 
         for (int i = 0; i < rows * columns; i++) {
@@ -108,6 +127,78 @@ public class Puzzle extends JFrame {
         }
 
         pack();
+    }
+
+    private void savePuzzlePieceToDisk(BufferedImage piece) {
+        Path path = Paths.get("./pieces");
+
+        try {
+            if (Files.notExists(path)) {
+                Files.createDirectory(path);
+            }
+
+            ImageIO.write(piece, "png", new File("./pieces/" + piece.hashCode() + ".png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void calculatePiecesBitMap() {
+        File[] pieces = new File("./pieces").listFiles();
+        for (int i = 0; i < pieces.length; i++) {
+            BufferedImage piece = null;
+            try {
+                piece = ImageIO.read(pieces[i]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            long sumRGB = 0;
+            for (int y = 0; y < piece.getHeight(); y++) {
+                for (int x = 0; x < piece.getWidth(); x++) {
+                    sumRGB += piece.getRGB(x, y);
+                }
+            }
+
+            piecesBitMap.put(piecesBitMap.size(), sumRGB);
+        }
+
+    }
+
+    private void replaceIcons() {
+        List<Icon> icons = new ArrayList<>();
+        File[] pieces = new File("./pieces").listFiles();
+        for (int i = 0; i < pieces.length; i++) {
+            BufferedImage piece;
+            try {
+                piece = ImageIO.read(pieces[i]);
+                icons.add(new ImageIcon(piece));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        piecesBitMap.forEach((piecesKey, piecesValue) -> {
+            solutionBitMap.forEach((solutionKey, solutionValue) -> {
+                if (piecesValue.equals(solutionValue)) {
+                    System.out.println(piecesBitMap);
+                    System.out.println(solutionBitMap);
+                    System.out.println("Pieces Key: " + piecesKey);
+                    System.out.println("Pieces Value: " + piecesValue);
+                    System.out.println("Solution Key: " + solutionKey);
+                    System.out.println("Solution Value: " + solutionValue);
+                    System.out.println("--------");
+                    System.out.println(buttons.get(solutionKey).getIcon());
+
+                    buttons.get(solutionKey).setIcon(icons.get(piecesKey));
+                    updateButtons();
+                    System.out.println(buttons.get(solutionKey).getIcon());
+
+                    piecesBitMap.put(piecesKey, 0L);
+                    solutionBitMap.put(solutionKey, 1L);
+                }
+            });
+        });
     }
 
     private void setupResourcesAndUI() {
@@ -230,6 +321,12 @@ public class Puzzle extends JFrame {
 
         magicButton = new JMenuItem("Magic button");
         magicButton.setAccelerator(KeyStroke.getKeyStroke("M"));
+        magicButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                replaceIcons();
+            }
+        });
         magicButton.setEnabled(false);
         controls.add(magicButton);
 
