@@ -199,6 +199,10 @@ public class Puzzle extends JFrame {
                 }
             });
         });
+
+        for (File piece : pieces) {
+            piece.delete();
+        }
     }
 
     private void setupResourcesAndUI() {
