@@ -54,6 +54,8 @@ public class Puzzle extends JFrame {
     private int rows;
     private int columns;
 
+    private int counter = 100;
+
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
     }
