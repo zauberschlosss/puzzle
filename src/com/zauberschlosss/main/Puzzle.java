@@ -38,9 +38,15 @@ public class Puzzle extends JFrame {
     private List<Button> buttons = new ArrayList<>();
     private List<Point> solutionPoints = new ArrayList<>();
     private List<Integer> solutionAngles = new ArrayList<>();
-    private Map<Integer, Long> solutionBitMap = new HashMap<>();
-    private Map<Integer, Long> piecesBitMap = new HashMap<>();
     private List<Icon> icons = new ArrayList<>();
+
+    private List<Integer> lowerBorders = new ArrayList<>();
+    private List<Integer> upperBorders = new ArrayList<>();
+    private List<Integer> leftBorders = new ArrayList<>();
+    private List<Integer> rightBorders = new ArrayList<>();
+    private List<Double> upDownBorders = new ArrayList<>();
+    private List<Double> leftRightBorders = new ArrayList<>();
+    private List<BufferedImage> bufferedImages = new ArrayList<>();
 
     private Image image;
     private int width, height;
@@ -88,15 +94,6 @@ public class Puzzle extends JFrame {
                 BufferedImage piece = imageToBufferedImage(image);
 
                 savePuzzlePieceToDisk(piece);
-
-                long sumRGB = 0;
-                for (int y = 0; y < piece.getHeight(); y++) {
-                    for (int x = 0; x < piece.getWidth(); x++) {
-                        sumRGB += piece.getRGB(x, y);
-                    }
-                }
-
-                solutionBitMap.put(solutionBitMap.size(), sumRGB);
 
                 Button button;
                 int newRandomAngle;
@@ -156,16 +153,9 @@ public class Puzzle extends JFrame {
         gridSelection = new JComboBox<>();
         gridSelection.addItem(2);
         gridSelection.addItem(3);
-        gridSelection.addItem(4);
-        gridSelection.addItem(5);
-        gridSelection.addItem(6);
-        gridSelection.addItem(7);
-        gridSelection.addItem(8);
-        gridSelection.addItem(9);
-        gridSelection.addItem(10);
 
         gridSelection.setSelectedIndex(1);
-        gridSelection.setMaximumRowCount(9);
+        gridSelection.setMaximumRowCount(2);
 
         sourceImageTab.add(grid);
         sourceImageTab.add(gridSelection);
@@ -245,7 +235,7 @@ public class Puzzle extends JFrame {
         magicButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loadPiecesAndInitPiecesBitMap();
+                loadPiecesAndCalculateGradients();
                 magicButton();
             }
         });
@@ -268,8 +258,13 @@ public class Puzzle extends JFrame {
         buttons = new ArrayList<>();
         solutionPoints = new ArrayList<>();
         solutionAngles = new ArrayList<>();
-        solutionBitMap = new HashMap<>();
-        piecesBitMap = new HashMap<>();
+        lowerBorders = new ArrayList<>();
+        upperBorders = new ArrayList<>();
+        leftBorders = new ArrayList<>();
+        rightBorders = new ArrayList<>();
+        upDownBorders = new ArrayList<>();
+        leftRightBorders = new ArrayList<>();
+        bufferedImages = new ArrayList<>();
         icons = new ArrayList<>();
         panel.removeAll();
         puzzlePicture.removeAll();
@@ -317,25 +312,103 @@ public class Puzzle extends JFrame {
         }
     }
 
-    private void loadPiecesAndInitPiecesBitMap() {
+    private void loadPiecesAndCalculateGradients() {
         File[] pieces = new File("./pieces").listFiles();
+
         for (int i = 0; i < pieces.length; i++) {
             BufferedImage piece = null;
             try {
                 piece = ImageIO.read(pieces[i]);
-                icons.add(new ImageIcon(piece));
+                bufferedImages.add(piece);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            long sumRGB = 0;
-            for (int y = 0; y < piece.getHeight(); y++) {
-                for (int x = 0; x < piece.getWidth(); x++) {
-                    sumRGB += piece.getRGB(x, y);
-                }
+            int sumRGBlowerBorder = 0;
+            int sumRGBupperBorder = 0;
+
+            for (int x = 0; x < piece.getWidth(); x++) {
+                int rgbLower = piece.getRGB(x, piece.getHeight() - 1);
+                int redLower = (rgbLower >> 16) & 0xff;
+                int greenLower = (rgbLower >> 8) & 0xff;
+                int blueLower = (rgbLower) & 0xff;
+                sumRGBlowerBorder += redLower + greenLower + blueLower;
+
+                int rgbUpper = piece.getRGB(x, 0);
+                int redUpper = (rgbUpper >> 16) & 0xff;
+                int greenUpper = (rgbUpper >> 8) & 0xff;
+                int blueUpper = (rgbUpper) & 0xff;
+                sumRGBupperBorder += redUpper + greenUpper + blueUpper;
             }
 
-            piecesBitMap.put(piecesBitMap.size(), sumRGB);
+            lowerBorders.add(sumRGBlowerBorder);
+            upperBorders.add(sumRGBupperBorder);
+
+            int sumRGBleftBorder = 0;
+            int sumRGBrightBorder = 0;
+
+            for (int y = 0; y < piece.getHeight(); y++) {
+                int rgbLeft = piece.getRGB(0, y);
+                int redLeft = (rgbLeft >> 16) & 0xff;
+                int greenLeft = (rgbLeft >> 8) & 0xff;
+                int blueLeft = (rgbLeft) & 0xff;
+                sumRGBleftBorder += redLeft + greenLeft + blueLeft;
+
+                int rgbRight = piece.getRGB(piece.getWidth() - 1, y);
+                int redRight = (rgbRight >> 16) & 0xff;
+                int greenRight = (rgbRight >> 8) & 0xff;
+                int blueRight = (rgbRight) & 0xff;
+                sumRGBrightBorder += redRight + greenRight + blueRight;
+            }
+
+            leftBorders.add(sumRGBleftBorder);
+            rightBorders.add(sumRGBrightBorder);
+        }
+
+        for (int i = 0; i < upperBorders.size() - rows; i++) {
+            upDownBorders.add(Math.abs(((((lowerBorders.get(i) * 1.0) / upperBorders.get(i + rows) * 1.0) * 100) - 100)));
+        }
+
+        int columnsCounter = 0;
+        for (int i = 1; i < leftBorders.size(); i++) {
+            leftRightBorders.add(Math.abs(((((leftBorders.get(i) * 1.0) / rightBorders.get(i - 1) * 1.0) * 100) - 100)));
+            if (i == columns + columnsCounter - 1) {
+                i++;
+                columnsCounter += columns;
+            }
+        }
+
+        while (Collections.max(upDownBorders) > 10 || Collections.max(leftRightBorders) > 10) { // Puzzle assembling precision
+            columnsCounter = 0;
+            long nanoSeed = System.nanoTime();
+            Collections.shuffle(lowerBorders, new Random(nanoSeed));
+            Collections.shuffle(upperBorders, new Random(nanoSeed));
+            Collections.shuffle(leftBorders, new Random(nanoSeed));
+            Collections.shuffle(rightBorders, new Random(nanoSeed));
+            Collections.shuffle(bufferedImages, new Random(nanoSeed));
+
+            upDownBorders = new ArrayList<>();
+            leftRightBorders = new ArrayList<>();
+
+            for (int i = 0; i < upperBorders.size() - rows; i++) {
+                upDownBorders.add(Math.abs(((((lowerBorders.get(i) * 1.0) / upperBorders.get(i + rows) * 1.0) * 100) - 100)));
+            }
+
+            for (int i = 1; i < leftBorders.size(); i++) {
+                leftRightBorders.add(Math.abs(((((leftBorders.get(i) * 1.0) / rightBorders.get(i - 1) * 1.0) * 100) - 100)));
+                if (i == columns + columnsCounter - 1) {
+                    i++;
+                    columnsCounter += columns;
+                }
+            }
+        }
+
+        System.out.println(Collections.max(upDownBorders));
+        System.out.println(Collections.max(leftRightBorders));
+
+        for (int i = 0; i < buttons.size(); i++) {
+            buttons.get(i).setIcon(new ImageIcon(bufferedImages.get(i)));
+            updateButtons();
         }
 
         for (File piece : pieces) {
@@ -344,15 +417,6 @@ public class Puzzle extends JFrame {
     }
 
     private void magicButton() {
-        piecesBitMap.forEach((piecesKey, piecesValue) -> {
-            solutionBitMap.forEach((solutionKey, solutionValue) -> {
-                if (piecesValue.equals(solutionValue)) {
-                    buttons.get(solutionKey).setIcon(icons.get(piecesKey));
-                    updateButtons();
-                }
-            });
-        });
-
         for (int i = 0; i < buttons.size(); i++) {
             buttons.get(i).putClientProperty("position", solutionPoints.get(i));
             buttons.get(i).setAngle(0);
