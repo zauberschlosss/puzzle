@@ -130,6 +130,7 @@ public class Puzzle extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.addKeyListener(new KeyListener(this));
 
+        panel.addKeyListener(new KeyListener(this));
         tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -214,7 +215,7 @@ public class Puzzle extends JFrame {
 
         rotateClockwise = new JMenuItem("Rotate clockwise");
         rotateClockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_D));
-        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
+//        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
         rotateClockwise.setEnabled(false);
         controls.add(rotateClockwise);
 
@@ -314,6 +315,7 @@ public class Puzzle extends JFrame {
 
     private void loadPiecesAndCalculateGradients() {
         File[] pieces = new File("./pieces").listFiles();
+        int columnsCounter = 0;
 
         for (int i = 0; i < pieces.length; i++) {
             BufferedImage piece = null;
@@ -365,18 +367,7 @@ public class Puzzle extends JFrame {
             rightBorders.add(sumRGBrightBorder);
         }
 
-        for (int i = 0; i < upperBorders.size() - rows; i++) {
-            upDownBorders.add(Math.abs(((((lowerBorders.get(i) * 1.0) / upperBorders.get(i + rows) * 1.0) * 100) - 100)));
-        }
-
-        int columnsCounter = 0;
-        for (int i = 1; i < leftBorders.size(); i++) {
-            leftRightBorders.add(Math.abs(((((leftBorders.get(i) * 1.0) / rightBorders.get(i - 1) * 1.0) * 100) - 100)));
-            if (i == columns + columnsCounter - 1) {
-                i++;
-                columnsCounter += columns;
-            }
-        }
+        calculateBordersMatchPercentage(columnsCounter);
 
         while (Collections.max(upDownBorders) > 10 || Collections.max(leftRightBorders) > 10) { // Puzzle assembling precision
             columnsCounter = 0;
@@ -390,17 +381,7 @@ public class Puzzle extends JFrame {
             upDownBorders = new ArrayList<>();
             leftRightBorders = new ArrayList<>();
 
-            for (int i = 0; i < upperBorders.size() - rows; i++) {
-                upDownBorders.add(Math.abs(((((lowerBorders.get(i) * 1.0) / upperBorders.get(i + rows) * 1.0) * 100) - 100)));
-            }
-
-            for (int i = 1; i < leftBorders.size(); i++) {
-                leftRightBorders.add(Math.abs(((((leftBorders.get(i) * 1.0) / rightBorders.get(i - 1) * 1.0) * 100) - 100)));
-                if (i == columns + columnsCounter - 1) {
-                    i++;
-                    columnsCounter += columns;
-                }
-            }
+            calculateBordersMatchPercentage(columnsCounter);
         }
 
         System.out.println(Collections.max(upDownBorders));
@@ -413,6 +394,20 @@ public class Puzzle extends JFrame {
 
         for (File piece : pieces) {
             piece.delete();
+        }
+    }
+
+    private void calculateBordersMatchPercentage(int columnsCounter) {
+        for (int i = 0; i < upperBorders.size() - rows; i++) {
+            upDownBorders.add(Math.abs(((((lowerBorders.get(i) * 1.0) / upperBorders.get(i + rows) * 1.0) * 100) - 100)));
+        }
+
+        for (int i = 1; i < leftBorders.size(); i++) {
+            leftRightBorders.add(Math.abs(((((leftBorders.get(i) * 1.0) / rightBorders.get(i - 1) * 1.0) * 100) - 100)));
+            if (i == columns + columnsCounter - 1) {
+                i++;
+                columnsCounter += columns;
+            }
         }
     }
 
