@@ -273,8 +273,10 @@ public class Puzzle extends JFrame {
         puzzlePicture.removeAll();
 
         File[] pieces = new File("./pieces").listFiles();
-        for (File piece : pieces) {
-            piece.delete();
+        if (Files.exists(Paths.get("./pieces"))) {
+            for (File piece : pieces) {
+                piece.delete();
+            }
         }
     }
 
@@ -486,7 +488,7 @@ public class Puzzle extends JFrame {
 
         if (compareList(solutionPoints, currentPoints) && compareList(solutionAngles, currentAngles)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
-            solutionPoints = null;
+            solutionPoints = new ArrayList<>();
             panel.setBorder(BorderFactory.createLineBorder(Color.green));
             Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
