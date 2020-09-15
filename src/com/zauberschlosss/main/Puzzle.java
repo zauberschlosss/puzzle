@@ -59,6 +59,8 @@ public class Puzzle extends JFrame {
     private boolean initRotated = false;
     private int rows;
     private int columns;
+    private double averageUpDown = 0;
+    private double averageLeftRight = 0;
 
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
@@ -215,7 +217,7 @@ public class Puzzle extends JFrame {
 
         rotateClockwise = new JMenuItem("Rotate clockwise");
         rotateClockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_D));
-//        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
+        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
         rotateClockwise.setEnabled(false);
         controls.add(rotateClockwise);
 
@@ -269,6 +271,11 @@ public class Puzzle extends JFrame {
         icons = new ArrayList<>();
         panel.removeAll();
         puzzlePicture.removeAll();
+
+        File[] pieces = new File("./pieces").listFiles();
+        for (File piece : pieces) {
+            piece.delete();
+        }
     }
 
     public void initResources() {
@@ -369,7 +376,7 @@ public class Puzzle extends JFrame {
 
         calculateBordersMatchPercentage(columnsCounter);
 
-        while (Collections.max(upDownBorders) > 10 || Collections.max(leftRightBorders) > 10) { // Puzzle assembling precision
+        while (averageUpDown > 4 || averageLeftRight > 4) { // Puzzle assembling precision
             columnsCounter = 0;
             long nanoSeed = System.nanoTime();
             Collections.shuffle(lowerBorders, new Random(nanoSeed));
@@ -386,6 +393,8 @@ public class Puzzle extends JFrame {
 
         System.out.println(Collections.max(upDownBorders));
         System.out.println(Collections.max(leftRightBorders));
+        System.out.println(averageUpDown);
+        System.out.println(averageLeftRight);
 
         for (int i = 0; i < buttons.size(); i++) {
             buttons.get(i).setIcon(new ImageIcon(bufferedImages.get(i)));
@@ -409,6 +418,9 @@ public class Puzzle extends JFrame {
                 columnsCounter += columns;
             }
         }
+
+        averageUpDown = upDownBorders.stream().mapToDouble(Double::doubleValue).sum() / upDownBorders.size();
+        averageLeftRight = leftRightBorders.stream().mapToDouble(Double::doubleValue).sum() / leftRightBorders.size();
     }
 
     private void magicButton() {
