@@ -63,8 +63,8 @@ public class Puzzle extends JFrame {
     private double averageUpDown = 0;
     private double averageLeftRight = 0;
     private Date startTime;
-    private boolean timeTrigger = true;
     private double precisionPercent = 1;
+    private boolean timeTrigger = true;
 
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
