@@ -274,6 +274,7 @@ public class Puzzle extends JFrame {
         bufferedImages = new ArrayList<>();
         icons = new ArrayList<>();
         precisionPercent = 1;
+        timeTrigger = true;
         panel.removeAll();
         puzzlePicture.removeAll();
 
@@ -437,7 +438,7 @@ public class Puzzle extends JFrame {
         long secondsDifference = new Date().getTime() - startTime.getTime();
         if (TimeUnit.MILLISECONDS.toSeconds(secondsDifference) >= 1) {
             timeTrigger = true;
-            precisionPercent += 0.75; // precision percentage auto increment
+            precisionPercent += 0.5; // precision percentage auto increment
         }
     }
 
