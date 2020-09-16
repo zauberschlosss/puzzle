@@ -1,10 +1,12 @@
 package com.zauberschlosss.main;
 
+import com.zauberschlosss.listeners.FileChooserListener;
+import com.zauberschlosss.listeners.KeyListener;
+import com.zauberschlosss.listeners.URListener;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
@@ -17,13 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Random;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import com.zauberschlosss.listeners.*;
 
 public class Puzzle extends JFrame {
     private JPanel panel = new JPanel();
@@ -42,7 +39,16 @@ public class Puzzle extends JFrame {
     private List<Button> buttons = new ArrayList<>();
     private List<Point> solutionPoints = new ArrayList<>();
     private List<Integer> solutionAngles = new ArrayList<>();
-    private List<Icon> icons = new ArrayList<>();
+
+    private Image image;
+    private int width, height;
+    private int rows, columns;
+    private final int DESIRED_WIDTH = 800;
+    private boolean initRotated = false;
+    private BufferedImage source;
+    private BufferedImage resized;
+    private String dataSource;
+    private String uri;
 
     private List<Integer> lowerBorders = new ArrayList<>();
     private List<Integer> upperBorders = new ArrayList<>();
@@ -52,17 +58,6 @@ public class Puzzle extends JFrame {
     private List<Double> leftRightBorders = new ArrayList<>();
     private List<BufferedImage> bufferedImages = new ArrayList<>();
 
-    private Image image;
-    private int width, height;
-    private final int DESIRED_WIDTH = 800;
-    private BufferedImage source;
-    private BufferedImage resized;
-    private String dataSource;
-    private String uri;
-
-    private boolean initRotated = false;
-    private int rows;
-    private int columns;
     private double averageUpDown = 0;
     private double averageLeftRight = 0;
     private Date startTime;
@@ -98,7 +93,7 @@ public class Puzzle extends JFrame {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 image = createImage(new FilteredImageSource(resized.getSource(),
-                        new CropImageFilter(j * width / rows, i * height / columns, (width / rows), height / columns)));
+                        new CropImageFilter(j * width / columns, i * height / rows, (width / columns), height / rows)));
 
                 BufferedImage piece = imageToBufferedImage(image);
 
@@ -182,34 +177,28 @@ public class Puzzle extends JFrame {
 
         playAgain = new JMenuItem("Play again");
         playAgain.setAccelerator(KeyStroke.getKeyStroke("R"));
-        playAgain.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reset();
-                initResources();
-                tabsPane.setSelectedIndex(0);
-            }
+        playAgain.addActionListener(e -> {
+            reset();
+            initResources();
+            tabsPane.setSelectedIndex(0);
         });
         playAgain.setEnabled(false);
         game.add(playAgain);
 
         newPuzzle = new JMenuItem("New puzzle");
         newPuzzle.setAccelerator(KeyStroke.getKeyStroke("N"));
-        newPuzzle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                tabsPane.setEnabledAt(0, false);
-                tabsPane.setEnabledAt(1, false);
-                playAgain.setEnabled(false);
-                newPuzzle.setEnabled(false);
-                rotateClockwise.setEnabled(false);
-                rotateAnticlockwise.setEnabled(false);
-                rotateAround.setEnabled(false);
-                magicButton.setEnabled(false);
-                puzzlePicture.removeAll();
+        newPuzzle.addActionListener(e -> {
+            tabsPane.setEnabledAt(0, false);
+            tabsPane.setEnabledAt(1, false);
+            playAgain.setEnabled(false);
+            newPuzzle.setEnabled(false);
+            rotateClockwise.setEnabled(false);
+            rotateAnticlockwise.setEnabled(false);
+            rotateAround.setEnabled(false);
+            magicButton.setEnabled(false);
+            puzzlePicture.removeAll();
 
-                tabsPane.setSelectedIndex(2);
-            }
+            tabsPane.setSelectedIndex(2);
         });
         newPuzzle.setEnabled(false);
         game.add(newPuzzle);
@@ -242,12 +231,9 @@ public class Puzzle extends JFrame {
 
         magicButton = new JMenuItem("Magic button");
         magicButton.setAccelerator(KeyStroke.getKeyStroke("M"));
-        magicButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadPiecesAndCalculateGradients();
-                magicButton();
-            }
+        magicButton.addActionListener(e -> {
+            loadPiecesAndCalculateGradients();
+            magicButton();
         });
         magicButton.setEnabled(false);
         controls.add(magicButton);
@@ -275,7 +261,6 @@ public class Puzzle extends JFrame {
         upDownBorders = new ArrayList<>();
         leftRightBorders = new ArrayList<>();
         bufferedImages = new ArrayList<>();
-        icons = new ArrayList<>();
         precisionPercent = 1;
         timeTrigger = true;
         panel.removeAll();
