@@ -1,9 +1,5 @@
 package com.zauberschlosss.main;
 
-import com.zauberschlosss.listeners.FileChooserListener;
-import com.zauberschlosss.listeners.MKeyListener;
-import com.zauberschlosss.listeners.URListener;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +23,8 @@ import java.util.Random;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import com.zauberschlosss.listeners.*;
+
 public class Puzzle extends JFrame {
     private JPanel panel = new JPanel();
     private JPanel sourceImageTab;
@@ -41,7 +39,7 @@ public class Puzzle extends JFrame {
     private JComboBox<Integer> gridSelection;
     private JCheckBox checkBoxIsRotated;
 
-    private List<Button> buttons = new ArrayList<>();
+    private List<MButton> buttons = new ArrayList<>();
     private List<Point> solutionPoints = new ArrayList<>();
     private List<Integer> solutionAngles = new ArrayList<>();
     private List<Icon> icons = new ArrayList<>();
@@ -106,14 +104,14 @@ public class Puzzle extends JFrame {
 
                 savePuzzlePieceToDisk(piece);
 
-                Button button;
+                MButton button;
                 int newRandomAngle;
                 if (!initRotated) {
-                    button = new Button(image, this);
+                    button = new MButton(image, this);
                 } else {
                     newRandomAngle = new Random().nextInt(4);
-                    button = new Button(image, this);
-                    button = rotateIcon(button, Button.angles[newRandomAngle]);
+                    button = new MButton(image, this);
+                    button = rotateIcon(button, MButton.angles[newRandomAngle]);
                 }
 
                 button.putClientProperty("position", new Point(i, j));
@@ -125,7 +123,7 @@ public class Puzzle extends JFrame {
         Collections.shuffle(buttons);
 
         for (int i = 0; i < rows * columns; i++) {
-            Button button = buttons.get(i);
+            MButton button = buttons.get(i);
             panel.add(button);
             button.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
@@ -226,19 +224,19 @@ public class Puzzle extends JFrame {
 
         rotateClockwise = new JMenuItem("Rotate clockwise");
         rotateClockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_D));
-        rotateClockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, 90));
+        rotateClockwise.addActionListener(e -> rotateIcon(MButton.buttonPressed, 90));
         rotateClockwise.setEnabled(false);
         controls.add(rotateClockwise);
 
         rotateAnticlockwise = new JMenuItem("Rotate anticlockwise");
         rotateAnticlockwise.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_A));
-        rotateAnticlockwise.addActionListener(e -> rotateIcon(Button.buttonPressed, -90));
+        rotateAnticlockwise.addActionListener(e -> rotateIcon(MButton.buttonPressed, -90));
         rotateAnticlockwise.setEnabled(false);
         controls.add(rotateAnticlockwise);
 
         rotateAround = new JMenuItem("Rotate 180");
         rotateAround.setAccelerator(KeyStroke.getKeyStroke((char) KeyEvent.VK_W));
-        rotateAround.addActionListener(e -> rotateIcon(Button.buttonPressed, 180));
+        rotateAround.addActionListener(e -> rotateIcon(MButton.buttonPressed, 180));
         rotateAround.setEnabled(false);
         controls.add(rotateAround);
 
@@ -512,7 +510,7 @@ public class Puzzle extends JFrame {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
             solutionPoints = new ArrayList<>();
             panel.setBorder(BorderFactory.createLineBorder(Color.green));
-            Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
+            MButton.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
 
@@ -554,7 +552,7 @@ public class Puzzle extends JFrame {
         return rotatedIcon;
     }
 
-    public Button rotateIcon(Button button, int angle) {
+    public MButton rotateIcon(MButton button, int angle) {
         Icon newIcon = button.getIcon();
         Image newImage = iconToBufferedImage(newIcon);
         newIcon = rotateImage(newImage, angle);
@@ -593,7 +591,7 @@ public class Puzzle extends JFrame {
         return bi;
     }
 
-    public List<Button> getButtons() {
+    public List<MButton> getButtons() {
         return buttons;
     }
 

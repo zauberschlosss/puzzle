@@ -15,15 +15,15 @@ public class MKeyListener extends KeyAdapter {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_A) {
-            puzzle.rotateIcon(Button.buttonPressed, -90);
+            puzzle.rotateIcon(MButton.buttonPressed, -90);
         }
 
         if (e.getKeyCode() == KeyEvent.VK_D) {
-            puzzle.rotateIcon(Button.buttonPressed, 90);
+            puzzle.rotateIcon(MButton.buttonPressed, 90);
         }
 
         if ((e.getKeyCode() == KeyEvent.VK_W) || (e.getKeyCode() == KeyEvent.VK_S)) {
-            puzzle.rotateIcon(Button.buttonPressed, 180);
+            puzzle.rotateIcon(MButton.buttonPressed, 180);
         }
 
 

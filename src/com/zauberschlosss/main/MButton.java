@@ -5,16 +5,16 @@ import com.zauberschlosss.listeners.MMouseListener;
 import javax.swing.*;
 import java.awt.Image;
 
-public class Button extends JButton {
-    public static Button buttonPressed;
-    public static Button buttonReleased;
+public class MButton extends JButton {
+    public static MButton buttonPressed;
+    public static MButton buttonReleased;
     static int[] angles = new int[] {0, 90, 180, 270};
 
     private int angle = 0;
     private Puzzle puzzle;
     private MMouseListener mouseListener;
 
-    public Button(Image image, Puzzle puzzle) {
+    public MButton(Image image, Puzzle puzzle) {
         super(new ImageIcon(image));
         this.puzzle = puzzle;
         mouseListener = new MMouseListener(this, puzzle);

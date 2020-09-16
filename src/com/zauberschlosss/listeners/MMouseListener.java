@@ -9,10 +9,10 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 
 public class MMouseListener extends MouseAdapter {
-    private Button button;
+    private MButton button;
     private Puzzle puzzle;
 
-    public MMouseListener(Button button, Puzzle puzzle) {
+    public MMouseListener(MButton button, Puzzle puzzle) {
         this.button = button;
         this.puzzle = puzzle;
     }
@@ -20,7 +20,7 @@ public class MMouseListener extends MouseAdapter {
     @Override
     public void mouseEntered(MouseEvent e) {
         button.setBorder(BorderFactory.createLineBorder(Color.blue));
-        Button.buttonReleased = (Button) e.getComponent();
+        MButton.buttonReleased = (MButton) e.getComponent();
     }
 
     @Override
@@ -30,19 +30,19 @@ public class MMouseListener extends MouseAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Button.buttonPressed = (Button) e.getComponent();
+        MButton.buttonPressed = (MButton) e.getComponent();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (Button.buttonPressed != null && Button.buttonReleased != null) {
-            int pressedButtonIndex = puzzle.getButtons().indexOf(Button.buttonPressed);
-            int releasedButtonIndex = puzzle.getButtons().indexOf(Button.buttonReleased);
+        if (MButton.buttonPressed != null && MButton.buttonReleased != null) {
+            int pressedButtonIndex = puzzle.getButtons().indexOf(MButton.buttonPressed);
+            int releasedButtonIndex = puzzle.getButtons().indexOf(MButton.buttonReleased);
 
             if (pressedButtonIndex != releasedButtonIndex) {
                 Collections.swap(puzzle.getButtons(), pressedButtonIndex, releasedButtonIndex);
-                Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.blue));
-                Button.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
+                MButton.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.blue));
+                MButton.buttonReleased.setBorder(BorderFactory.createLineBorder(Color.gray));
             }
 
             puzzle.updateButtons();
