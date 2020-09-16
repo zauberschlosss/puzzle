@@ -8,11 +8,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
 
-public class MouseListener extends MouseAdapter {
+public class MMouseListener extends MouseAdapter {
     private Button button;
     private Puzzle puzzle;
 
-    public MouseListener(Button button, Puzzle puzzle) {
+    public MMouseListener(Button button, Puzzle puzzle) {
         this.button = button;
         this.puzzle = puzzle;
     }

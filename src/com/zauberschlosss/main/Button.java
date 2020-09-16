@@ -1,6 +1,6 @@
 package com.zauberschlosss.main;
 
-import com.zauberschlosss.listeners.MouseListener;
+import com.zauberschlosss.listeners.MMouseListener;
 
 import javax.swing.*;
 import java.awt.Image;
@@ -12,12 +12,12 @@ public class Button extends JButton {
 
     private int angle = 0;
     private Puzzle puzzle;
-    private MouseListener mouseListener;
+    private MMouseListener mouseListener;
 
     public Button(Image image, Puzzle puzzle) {
         super(new ImageIcon(image));
         this.puzzle = puzzle;
-        mouseListener = new MouseListener(this, puzzle);
+        mouseListener = new MMouseListener(this, puzzle);
         addMouseListener(mouseListener);
     }
 
