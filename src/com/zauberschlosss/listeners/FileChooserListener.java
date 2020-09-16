@@ -1,7 +1,6 @@
 package com.zauberschlosss.listeners;
 
-import com.zauberschlosss.main.JpgFileFilter;
-import com.zauberschlosss.main.Puzzle;
+import com.zauberschlosss.main.*;
 
 import javax.swing.*;
 import java.awt.*;

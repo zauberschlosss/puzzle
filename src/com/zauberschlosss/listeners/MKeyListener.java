@@ -1,15 +1,14 @@
 package com.zauberschlosss.listeners;
 
-import com.zauberschlosss.main.Button;
-import com.zauberschlosss.main.Puzzle;
+import com.zauberschlosss.main.*;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class KeyListener extends KeyAdapter {
+public class MKeyListener extends KeyAdapter {
     private final Puzzle puzzle;
 
-    public KeyListener(Puzzle puzzle) {
+    public MKeyListener(Puzzle puzzle) {
         this.puzzle = puzzle;
     }
 

@@ -1,13 +1,15 @@
 package com.zauberschlosss.main;
 
 import com.zauberschlosss.listeners.FileChooserListener;
-import com.zauberschlosss.listeners.KeyListener;
+import com.zauberschlosss.listeners.MKeyListener;
 import com.zauberschlosss.listeners.URListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -18,8 +20,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Random;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class Puzzle extends JFrame {
@@ -134,9 +139,9 @@ public class Puzzle extends JFrame {
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        panel.addKeyListener(new KeyListener(this));
+        panel.addKeyListener(new MKeyListener(this));
 
-        panel.addKeyListener(new KeyListener(this));
+        panel.addKeyListener(new MKeyListener(this));
         tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));

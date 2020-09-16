@@ -1,10 +1,9 @@
 package com.zauberschlosss.listeners;
 
-import com.zauberschlosss.main.Button;
-import com.zauberschlosss.main.Puzzle;
+import com.zauberschlosss.main.*;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;

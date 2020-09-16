@@ -3,7 +3,7 @@ package com.zauberschlosss.main;
 import com.zauberschlosss.listeners.MouseListener;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Image;
 
 public class Button extends JButton {
     public static Button buttonPressed;
