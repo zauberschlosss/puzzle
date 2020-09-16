@@ -1,8 +1,6 @@
 package com.zauberschlosss.main;
 
-import com.zauberschlosss.listeners.FileChooserListener;
-import com.zauberschlosss.listeners.KeyListener;
-import com.zauberschlosss.listeners.URListener;
+import com.zauberschlosss.listeners.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -21,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 public class Puzzle extends JFrame {
     private JPanel panel = new JPanel();
@@ -268,9 +268,7 @@ public class Puzzle extends JFrame {
 
         File[] pieces = new File("./pieces").listFiles();
         if (Files.exists(Paths.get("./pieces"))) {
-            for (File piece : pieces) {
-                piece.delete();
-            }
+            Arrays.stream(pieces).forEach(File::delete);
         }
     }
 
@@ -387,19 +385,15 @@ public class Puzzle extends JFrame {
             calculateBordersMatchPercentage(columnsCounter);
         }
 
-        System.out.println(Collections.max(upDownBorders));
-        System.out.println(Collections.max(leftRightBorders));
-        System.out.println(averageUpDown);
-        System.out.println(averageLeftRight);
+        Stream.of(Collections.max(upDownBorders), Collections.max(leftRightBorders), averageUpDown, averageLeftRight).forEach(System.out::println);
+        System.out.println();
 
         for (int i = 0; i < buttons.size(); i++) {
             buttons.get(i).setIcon(new ImageIcon(bufferedImages.get(i)));
             updateButtons();
         }
 
-        for (File piece : pieces) {
-            piece.delete();
-        }
+        Arrays.stream(pieces).forEach(File::delete);
     }
 
     private void calculateBordersMatchPercentage(int columnsCounter) {
@@ -495,7 +489,6 @@ public class Puzzle extends JFrame {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
             solutionPoints = new ArrayList<>();
             panel.setBorder(BorderFactory.createLineBorder(Color.green));
-            Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
 
