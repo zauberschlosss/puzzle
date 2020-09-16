@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Puzzle extends JFrame {
     private JPanel panel = new JPanel();
@@ -61,6 +62,9 @@ public class Puzzle extends JFrame {
     private int columns;
     private double averageUpDown = 0;
     private double averageLeftRight = 0;
+    private Date startTime;
+    private boolean timeTrigger = true;
+    private double precisionPercent = 1;
 
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
@@ -269,6 +273,7 @@ public class Puzzle extends JFrame {
         leftRightBorders = new ArrayList<>();
         bufferedImages = new ArrayList<>();
         icons = new ArrayList<>();
+        precisionPercent = 1;
         panel.removeAll();
         puzzlePicture.removeAll();
 
@@ -378,7 +383,7 @@ public class Puzzle extends JFrame {
 
         calculateBordersMatchPercentage(columnsCounter);
 
-        while (averageUpDown > 4 || averageLeftRight > 4) { // Puzzle assembling precision
+        while (averageUpDown > precisionPercent || averageLeftRight > precisionPercent) { // Puzzle assembling precision
             columnsCounter = 0;
             long nanoSeed = System.nanoTime();
             Collections.shuffle(lowerBorders, new Random(nanoSeed));
@@ -423,6 +428,17 @@ public class Puzzle extends JFrame {
 
         averageUpDown = upDownBorders.stream().mapToDouble(Double::doubleValue).sum() / upDownBorders.size();
         averageLeftRight = leftRightBorders.stream().mapToDouble(Double::doubleValue).sum() / leftRightBorders.size();
+
+        if (timeTrigger) {
+            startTime = new Date();
+            timeTrigger = false;
+        }
+
+        long secondsDifference = new Date().getTime() - startTime.getTime();
+        if (TimeUnit.MILLISECONDS.toSeconds(secondsDifference) >= 1) {
+            timeTrigger = true;
+            precisionPercent += 0.75; // precision percentage auto increment
+        }
     }
 
     private void magicButton() {
