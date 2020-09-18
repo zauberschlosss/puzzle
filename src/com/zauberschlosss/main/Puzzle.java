@@ -64,7 +64,6 @@ public class Puzzle extends JFrame {
 
         panel.setBorder(BorderFactory.createLineBorder(Color.gray));
         panel.setLayout(new GridLayout(rows, columns, 0, 0));
-        panel.addKeyListener(new KeyListener(this));
 
         try {
             source = loadImage(dataSource, uri);
@@ -130,7 +129,6 @@ public class Puzzle extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.addKeyListener(new KeyListener(this));
 
-        panel.addKeyListener(new KeyListener(this));
         tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
