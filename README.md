@@ -1,2 +1,2 @@
-Swing Puzzle game
+Swing Puzzle game  
 Pixel analysis version
