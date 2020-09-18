@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 public class Puzzle extends JFrame {

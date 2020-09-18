@@ -6,11 +6,7 @@ import java.io.File;
 public class JpgFileFilter extends FileFilter {
     @Override
     public boolean accept(File f) {
-        if (f.isDirectory() || f.getName().toLowerCase().endsWith(".jpg")) {
-            return true;
-        }
-
-        return false;
+        return f.isDirectory() || f.getName().toLowerCase().endsWith(".jpg");
     }
 
     @Override
