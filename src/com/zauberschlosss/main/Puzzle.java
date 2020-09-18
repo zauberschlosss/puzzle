@@ -1,13 +1,11 @@
 package com.zauberschlosss.main;
 
-import com.zauberschlosss.listeners.FileChooserListener;
-import com.zauberschlosss.listeners.KeyListener;
-import com.zauberschlosss.listeners.URListener;
+import com.zauberschlosss.listeners.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -18,8 +16,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class Puzzle extends JFrame {
     private JPanel panel = new JPanel();
@@ -44,17 +42,13 @@ public class Puzzle extends JFrame {
 
     private Image image;
     private int width, height;
+    private int rows, columns;
     private final int DESIRED_WIDTH = 800;
+    private boolean initRotated = false;
     private BufferedImage source;
     private BufferedImage resized;
     private String dataSource;
     private String uri;
-
-    private boolean initRotated = false;
-    private int rows;
-    private int columns;
-
-    private int counter = 100;
 
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
@@ -134,7 +128,9 @@ public class Puzzle extends JFrame {
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        panel.addKeyListener(new KeyListener(this));
 
+        panel.addKeyListener(new KeyListener(this));
         tabsPane = new JTabbedPane();
         JPanel puzzleTab = panel;
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -184,34 +180,28 @@ public class Puzzle extends JFrame {
 
         playAgain = new JMenuItem("Play again");
         playAgain.setAccelerator(KeyStroke.getKeyStroke("R"));
-        playAgain.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reset();
-                initResources();
-                tabsPane.setSelectedIndex(0);
-            }
+        playAgain.addActionListener(e -> {
+            reset();
+            initResources();
+            tabsPane.setSelectedIndex(0);
         });
         playAgain.setEnabled(false);
         game.add(playAgain);
 
         newPuzzle = new JMenuItem("New puzzle");
         newPuzzle.setAccelerator(KeyStroke.getKeyStroke("N"));
-        newPuzzle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                tabsPane.setEnabledAt(0, false);
-                tabsPane.setEnabledAt(1, false);
-                playAgain.setEnabled(false);
-                newPuzzle.setEnabled(false);
-                rotateClockwise.setEnabled(false);
-                rotateAnticlockwise.setEnabled(false);
-                rotateAround.setEnabled(false);
-                magicButton.setEnabled(false);
-                puzzlePicture.removeAll();
+        newPuzzle.addActionListener(e -> {
+            tabsPane.setEnabledAt(0, false);
+            tabsPane.setEnabledAt(1, false);
+            playAgain.setEnabled(false);
+            newPuzzle.setEnabled(false);
+            rotateClockwise.setEnabled(false);
+            rotateAnticlockwise.setEnabled(false);
+            rotateAround.setEnabled(false);
+            magicButton.setEnabled(false);
+            puzzlePicture.removeAll();
 
-                tabsPane.setSelectedIndex(2);
-            }
+            tabsPane.setSelectedIndex(2);
         });
         newPuzzle.setEnabled(false);
         game.add(newPuzzle);
@@ -244,12 +234,9 @@ public class Puzzle extends JFrame {
 
         magicButton = new JMenuItem("Magic button");
         magicButton.setAccelerator(KeyStroke.getKeyStroke("M"));
-        magicButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadPiecesAndInitPiecesBitMap();
-                magicButton();
-            }
+        magicButton.addActionListener(e -> {
+            loadPiecesAndInitPiecesBitMap();
+            magicButton();
         });
         magicButton.setEnabled(false);
         controls.add(magicButton);
@@ -275,6 +262,11 @@ public class Puzzle extends JFrame {
         icons = new ArrayList<>();
         panel.removeAll();
         puzzlePicture.removeAll();
+
+        File[] pieces = new File("./pieces").listFiles();
+        if (Files.exists(Paths.get("./pieces"))) {
+            Arrays.stream(pieces).forEach(File::delete);
+        }
     }
 
     public void initResources() {
@@ -417,9 +409,8 @@ public class Puzzle extends JFrame {
 
         if (compareList(solutionPoints, currentPoints) && compareList(solutionAngles, currentAngles)) {
             JOptionPane.showMessageDialog(panel, "Puzzle assembled!","Congratulations!", JOptionPane.INFORMATION_MESSAGE);
-            solutionPoints = null;
+            solutionPoints = new ArrayList<>();
             panel.setBorder(BorderFactory.createLineBorder(Color.green));
-            Button.buttonPressed.setBorder(BorderFactory.createLineBorder(Color.gray));
         }
     }
 
