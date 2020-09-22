@@ -43,8 +43,8 @@ public class Puzzle extends JFrame {
     private Image image;
     private int width, height;
     private int rows, columns;
-    private final int DESIRED_WIDTH = 800;
-    private final int DESIRED_HEIGHT = 800;
+    private int DESIRED_WIDTH = 800;
+    private int DESIRED_HEIGHT = 800;
     private boolean initRotated = false;
     private BufferedImage source;
     private BufferedImage resized;
@@ -68,6 +68,14 @@ public class Puzzle extends JFrame {
 
         try {
             source = loadImage(dataSource, uri);
+
+            if (source.getWidth() < DESIRED_WIDTH) {
+                DESIRED_WIDTH = source.getWidth();
+            }
+            if (source.getHeight() < DESIRED_HEIGHT) {
+                DESIRED_HEIGHT = source.getHeight();
+            }
+
             if (source.getWidth() >= source.getHeight()) {
                 int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
                 resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
@@ -264,6 +272,8 @@ public class Puzzle extends JFrame {
         solutionBitMap = new HashMap<>();
         piecesBitMap = new HashMap<>();
         icons = new ArrayList<>();
+        DESIRED_WIDTH = 800;
+        DESIRED_HEIGHT = 800;
         panel.removeAll();
         puzzlePicture.removeAll();
 
