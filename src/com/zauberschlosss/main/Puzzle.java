@@ -44,6 +44,7 @@ public class Puzzle extends JFrame {
     private int width, height;
     private int rows, columns;
     private final int DESIRED_WIDTH = 800;
+    private final int DESIRED_HEIGHT = 800;
     private boolean initRotated = false;
     private BufferedImage source;
     private BufferedImage resized;
@@ -67,8 +68,13 @@ public class Puzzle extends JFrame {
 
         try {
             source = loadImage(dataSource, uri);
-            int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
-            resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
+            if (source.getWidth() >= source.getHeight()) {
+                int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
+                resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
+            } else {
+                int desiredWidth = getNewWidth(source.getWidth(), source.getHeight());
+                resized = resizeImage(source, desiredWidth, DESIRED_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,16 +131,16 @@ public class Puzzle extends JFrame {
         setTitle("Puzzle");
         setVisible(true);
         setSize(800, 600);
+        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.addKeyListener(new KeyListener(this));
 
         tabsPane = new JTabbedPane();
-        JPanel puzzleTab = panel;
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
         puzzlePicture = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        tabsPane.addTab("Puzzle", puzzleTab);
+        tabsPane.addTab("Puzzle", panel);
         tabsPane.addTab("Picture", puzzlePicture);
         tabsPane.addTab("Source", sourceImageTab);
 
@@ -271,9 +277,7 @@ public class Puzzle extends JFrame {
         try {
             rows = (int) gridSelection.getSelectedItem();
             columns = (int) gridSelection.getSelectedItem();
-            if (checkBoxIsRotated.isSelected()) {
-                initRotated = true;
-            }
+            initRotated = checkBoxIsRotated.isSelected();
 
             reset();
             initUI();
@@ -355,10 +359,16 @@ public class Puzzle extends JFrame {
         checkSolution();
     }
 
-    private int getNewHeight(int w, int h) {
-        double ratio = DESIRED_WIDTH / (double) w;
-        int newHeight = (int) (h * ratio);
+    private int getNewHeight(int width, int height) {
+        double ratio = DESIRED_WIDTH / (double) width;
+        int newHeight = (int) (height * ratio);
         return newHeight;
+    }
+
+    private int getNewWidth(int width, int height) {
+        double ratio = DESIRED_HEIGHT / (double) height;
+        int newWidth = (int) (width * ratio);
+        return newWidth;
     }
 
     private BufferedImage loadImage(String dataSource, String uri) {
