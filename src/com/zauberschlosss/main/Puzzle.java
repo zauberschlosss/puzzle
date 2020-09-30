@@ -76,7 +76,6 @@ public class Puzzle extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.addKeyListener(new KeyListener(this));
 
-        panel.addKeyListener(new KeyListener(this));
         tabsPane = new JTabbedPane();
         sourceImageTab = new JPanel(new FlowLayout(FlowLayout.CENTER));
         puzzlePicture = new JPanel(new FlowLayout(FlowLayout.CENTER));
