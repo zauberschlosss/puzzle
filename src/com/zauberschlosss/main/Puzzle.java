@@ -43,8 +43,8 @@ public class Puzzle extends JFrame {
     private Image image;
     private int width, height;
     private int rows, columns;
-    private int DESIRED_WIDTH = 800;
-    private int DESIRED_HEIGHT = 800;
+    private int staticWidth = 800;
+    private int staticHeight = 800;
     private boolean initRotated = false;
     private BufferedImage source;
     private BufferedImage resized;
@@ -53,86 +53,6 @@ public class Puzzle extends JFrame {
 
     public Puzzle() throws URISyntaxException {
         setupResourcesAndUI();
-    }
-
-    private void initUI() throws URISyntaxException {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                solutionPoints.add(new Point(i, j));
-                solutionAngles.add(0);
-            }
-        }
-
-        panel.setBorder(BorderFactory.createLineBorder(Color.gray));
-        panel.setLayout(new GridLayout(rows, columns, 0, 0));
-
-        try {
-            source = loadImage(dataSource, uri);
-
-            if (source.getWidth() < DESIRED_WIDTH) {
-                DESIRED_WIDTH = source.getWidth();
-            }
-            if (source.getHeight() < DESIRED_HEIGHT) {
-                DESIRED_HEIGHT = source.getHeight();
-            }
-
-            if (source.getWidth() >= source.getHeight()) {
-                int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
-                resized = resizeImage(source, DESIRED_WIDTH, desiredHeight, BufferedImage.TYPE_INT_ARGB);
-            } else {
-                int desiredWidth = getNewWidth(source.getWidth(), source.getHeight());
-                resized = resizeImage(source, desiredWidth, DESIRED_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        width = resized.getWidth();
-        height = resized.getHeight();
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                image = createImage(new FilteredImageSource(resized.getSource(),
-                        new CropImageFilter(j * width / rows, i * height / columns, (width / rows), height / columns)));
-
-                BufferedImage piece = imageToBufferedImage(image);
-
-                savePuzzlePieceToDisk(piece);
-
-                long sumRGB = 0;
-                for (int y = 0; y < piece.getHeight(); y++) {
-                    for (int x = 0; x < piece.getWidth(); x++) {
-                        sumRGB += piece.getRGB(x, y);
-                    }
-                }
-
-                solutionBitMap.put(solutionBitMap.size(), sumRGB);
-
-                Button button;
-                int newRandomAngle;
-                if (!initRotated) {
-                    button = new Button(image, this);
-                } else {
-                    newRandomAngle = new Random().nextInt(4);
-                    button = new Button(image, this);
-                    button = rotateIcon(button, Button.angles[newRandomAngle]);
-                }
-
-                button.putClientProperty("position", new Point(i, j));
-
-                buttons.add(button);
-            }
-        }
-
-        Collections.shuffle(buttons);
-
-        for (int i = 0; i < rows * columns; i++) {
-            Button button = buttons.get(i);
-            panel.add(button);
-            button.setBorder(BorderFactory.createLineBorder(Color.gray));
-        }
-
-        pack();
     }
 
     private void setupResourcesAndUI() {
@@ -265,6 +185,87 @@ public class Puzzle extends JFrame {
         tabsPane.setSelectedIndex(2);
     }
 
+
+    private void initUI() throws URISyntaxException {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                solutionPoints.add(new Point(i, j));
+                solutionAngles.add(0);
+            }
+        }
+
+        panel.setBorder(BorderFactory.createLineBorder(Color.gray));
+        panel.setLayout(new GridLayout(rows, columns, 0, 0));
+
+        try {
+            source = loadImage(dataSource, uri);
+
+            if (source.getWidth() < staticWidth) {
+                staticWidth = source.getWidth();
+            }
+            if (source.getHeight() < staticHeight) {
+                staticHeight = source.getHeight();
+            }
+
+            if (source.getWidth() >= source.getHeight()) {
+                int desiredHeight = getNewHeight(source.getWidth(), source.getHeight());
+                resized = resizeImage(source, staticWidth, desiredHeight, BufferedImage.TYPE_INT_ARGB);
+            } else {
+                int desiredWidth = getNewWidth(source.getWidth(), source.getHeight());
+                resized = resizeImage(source, desiredWidth, staticHeight, BufferedImage.TYPE_INT_ARGB);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        width = resized.getWidth();
+        height = resized.getHeight();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                image = createImage(new FilteredImageSource(resized.getSource(),
+                        new CropImageFilter(j * width / rows, i * height / columns, (width / rows), height / columns)));
+
+                BufferedImage piece = imageToBufferedImage(image);
+
+                savePuzzlePieceToDisk(piece);
+
+                long sumRGB = 0;
+                for (int y = 0; y < piece.getHeight(); y++) {
+                    for (int x = 0; x < piece.getWidth(); x++) {
+                        sumRGB += piece.getRGB(x, y);
+                    }
+                }
+
+                solutionBitMap.put(solutionBitMap.size(), sumRGB);
+
+                Button button;
+                int newRandomAngle;
+                if (!initRotated) {
+                    button = new Button(image, this);
+                } else {
+                    newRandomAngle = new Random().nextInt(4);
+                    button = new Button(image, this);
+                    button = rotateIcon(button, Button.angles[newRandomAngle]);
+                }
+
+                button.putClientProperty("position", new Point(i, j));
+
+                buttons.add(button);
+            }
+        }
+
+        Collections.shuffle(buttons);
+
+        for (int i = 0; i < rows * columns; i++) {
+            Button button = buttons.get(i);
+            panel.add(button);
+            button.setBorder(BorderFactory.createLineBorder(Color.gray));
+        }
+
+        pack();
+    }
+
     private void reset() {
         buttons = new ArrayList<>();
         solutionPoints = new ArrayList<>();
@@ -272,8 +273,8 @@ public class Puzzle extends JFrame {
         solutionBitMap = new HashMap<>();
         piecesBitMap = new HashMap<>();
         icons = new ArrayList<>();
-        DESIRED_WIDTH = 800;
-        DESIRED_HEIGHT = 800;
+        staticWidth = 800;
+        staticHeight = 800;
         panel.removeAll();
         puzzlePicture.removeAll();
 
@@ -304,19 +305,18 @@ public class Puzzle extends JFrame {
             rotateAnticlockwise.setEnabled(true);
             rotateAround.setEnabled(true);
             magicButton.setEnabled(true);
-        } catch (URISyntaxException ex) {
+
+            Path path = Paths.get("./pieces");
+            if (Files.notExists(path)) {
+                Files.createDirectory(path);
+            }
+        } catch (URISyntaxException | IOException ex) {
             ex.printStackTrace();
         }
     }
 
     private void savePuzzlePieceToDisk(BufferedImage piece) {
-        Path path = Paths.get("./pieces");
-
         try {
-            if (Files.notExists(path)) {
-                Files.createDirectory(path);
-            }
-
             ImageIO.write(piece, "png", new File("./pieces/" + piece.hashCode() + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -370,13 +370,13 @@ public class Puzzle extends JFrame {
     }
 
     private int getNewHeight(int width, int height) {
-        double ratio = DESIRED_WIDTH / (double) width;
+        double ratio = staticWidth / (double) width;
         int newHeight = (int) (height * ratio);
         return newHeight;
     }
 
     private int getNewWidth(int width, int height) {
-        double ratio = DESIRED_HEIGHT / (double) height;
+        double ratio = staticHeight / (double) height;
         int newWidth = (int) (width * ratio);
         return newWidth;
     }
