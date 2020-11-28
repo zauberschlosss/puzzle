@@ -273,8 +273,8 @@ public class Puzzle extends JFrame {
         solutionBitMap = new HashMap<>();
         piecesBitMap = new HashMap<>();
         icons = new ArrayList<>();
-        staticWidth = 800;
-        staticHeight = 800;
+        staticWidth = 1000;
+        staticHeight = 1000; // adjust window width and/or height here
         panel.removeAll();
         puzzlePicture.removeAll();
 
